@@ -20,6 +20,7 @@ export function MemeTemplateSelector({
   onSelect,
   onNextClick,
 }: MemeTemplateSelectorProps) {
+  console.log("🚀 ~ selectedTemplate:", selectedTemplate);
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isSmallMobile, setIsSmallMobile] = useState(false);
@@ -152,12 +153,12 @@ export function MemeTemplateSelector({
         </Button>
       </div>
 
-      <div className="flex justify-center mt-6">
+      {selectedTemplate && <div className="flex justify-center mt-6 sticky bottom-4">
         <Button
           onClick={onNextClick}
           disabled={!hasSelectedTemplate}
           className={cn(
-            "w-full sm:w-auto bg-gradient-to-r font-comic border-2 border-white transition-all",
+            "w-full sm:w-auto bg-gradient-to-r font-comic border-2 border-white transition-all sticky bottom-4",
             hasSelectedTemplate
               ? "from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 opacity-100"
               : "from-gray-400 to-gray-500 opacity-70 cursor-not-allowed",
@@ -166,7 +167,7 @@ export function MemeTemplateSelector({
           <PenLine className="mr-2 h-4 w-4" />
           Add Your Text
         </Button>
-      </div>
+      </div>}
 
       {!hasSelectedTemplate && (
         <p className="text-center text-yellow-200 text-sm mt-2 animate-pulse">⬆️ Select a meme template first ⬆️</p>

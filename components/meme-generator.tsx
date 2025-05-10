@@ -202,7 +202,7 @@ export function MemeGenerator() {
       <h2 className="text-2xl sm:text-3xl font-bold text-center text-shadow-neon font-comic">Create Your Epic Meme!</h2>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-black/30 border-2 border-cyan-400">
+        <TabsList className="grid w-full grid-cols-3 bg-black/30 border-2 border-cyan-400 sticky top-2 z-20 backdrop-blur-sm">
           <TabsTrigger
             value="create"
             className="font-comic text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 px-1 sm:px-4"
