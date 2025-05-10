@@ -1,8 +1,13 @@
-import './theme.css';
+import '../styles/theme.css';
 import '@coinbase/onchainkit/styles.css';
 import type { Metadata, Viewport } from 'next';
-import './globals.css';
+import '../styles/globals.css';
 import { Providers } from './providers';
+import { Comic_Neue } from "next/font/google";
+import { ThemeProvider } from '../components/theme-provider';
+import { cn } from '../lib/utils';
+
+const comic = Comic_Neue({ subsets: ["latin"], weight: "400" });
 
 
 export const viewport: Viewport = {
@@ -41,10 +46,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-background">
-        <Providers>{children}</Providers>
+
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(comic.className, 'bg-background')}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <Providers>{children}</Providers>
+        </ThemeProvider>
       </body>
     </html>
+
   );
 }

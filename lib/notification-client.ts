@@ -3,18 +3,18 @@ import {
   type SendNotificationRequest,
   sendNotificationResponseSchema,
 } from "@farcaster/frame-sdk";
-import { getUserNotificationDetails } from "@/lib/notification";
+import { getUserNotificationDetails } from "../lib/notification";
 
 const appUrl = process.env.NEXT_PUBLIC_URL || "";
 
 type SendFrameNotificationResult =
   | {
-      state: "error";
-      error: unknown;
-    }
-  | { state: "no_token" }
-  | { state: "rate_limit" }
-  | { state: "success" };
+    state: "error";
+    error: unknown;
+  }
+  | { state: "no_token"; }
+  | { state: "rate_limit"; }
+  | { state: "success"; };
 
 export async function sendFrameNotification({
   fid,
