@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import { Comic_Neue } from "next/font/google";
 import { ThemeProvider } from '../components/theme-provider';
 import { cn } from '../lib/utils';
+import FrameAutomationProviders from '../components/frame-automation-providers';
 
 const comic = Comic_Neue({ subsets: ["latin"], weight: "400" });
 
@@ -50,7 +51,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn(comic.className, 'bg-background')}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <Providers>{children}</Providers>
+          <Providers>
+            <FrameAutomationProviders>
+              {children}
+            </FrameAutomationProviders>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>
