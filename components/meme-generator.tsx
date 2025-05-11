@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Share } from "lucide-react";
+import { MoveLeft, Plus, Share } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { DraggableTextInput } from "../components/draggable-text-input";
@@ -311,9 +311,9 @@ export function MemeGenerator() {
   const templateId = selectedTemplate?.id || 1;
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-2">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-black/30 border-2 border-cyan-400 sticky top-2 z-20 backdrop-blur-sm">
+        {/* <TabsList className="grid w-full grid-cols-3 bg-black/30 border-2 border-cyan-400 sticky top-2 z-20 backdrop-blur-sm">
           <TabsTrigger
             value="create"
             className="font-comic text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 px-1 sm:px-4"
@@ -332,7 +332,7 @@ export function MemeGenerator() {
           >
             Mint & Share
           </TabsTrigger>
-        </TabsList>
+        </TabsList> */}
 
         <TabsContent value="create" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
           <MemeTemplateSelector
@@ -344,6 +344,15 @@ export function MemeGenerator() {
         </TabsContent>
 
         <TabsContent value="edit" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
+          <div className='flex items-center space-x-2 mb-4'>
+            <div
+              onClick={() => setActiveTab("create")}
+              className='py-2 px-4 flex items-center space-x-2 bg-white/10 rounded-sm w-fit mb-2'>
+              <MoveLeft className='h-4 w-4' />
+            </div>
+            <h3 className='text-xl font-comic text-yellow-300 mb-2 text-center'>Add Text</h3>
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div>
@@ -432,6 +441,15 @@ export function MemeGenerator() {
         </TabsContent>
 
         <TabsContent value="share" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
+          <div className='flex items-center space-x-2 mb-4'>
+            <div
+              onClick={() => setActiveTab("edit")}
+              className='py-2 px-4 flex items-center space-x-2 bg-white/10 rounded-sm w-fit mb-2'>
+              <MoveLeft className='h-4 w-4' />
+            </div>
+            <h3 className='text-xl font-comic text-yellow-300 mb-2 text-center'>Your Meme is Ready!</h3>
+          </div>
+
           {generatedMeme ? (
             <div className="grid gap-6 md:grid-cols-2">
               <div className="flex flex-col items-center justify-center">
@@ -445,31 +463,13 @@ export function MemeGenerator() {
               </div>
 
               <div className="space-y-6">
-                <div className="p-4 bg-black/50 border-2 border-yellow-300 rounded-lg">
-                  <h3 className="text-xl font-comic text-yellow-300 mb-4">Your Meme is Ready!</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* <Button
-                      onClick={() => {
-                        // Create a temporary anchor element
-                        const link = document.createElement("a");
-                        link.href = generatedMeme;
-                        link.download = `meme-${Date.now()}.png`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}
-                      className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 font-comic border-2 border-white"
-                    >
-                      <Download className="mr-1 sm:mr-2 h-4 w-4" />
-                      <span className="text-xs sm:text-sm">Download</span>
-                    </Button> */}
-                    <Button
-                      onClick={handleShare}
-                      className="bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 font-comic border-2 border-white">
-                      <Share className="mr-1 sm:mr-2 h-4 w-4" />
-                      <span className="text-xs sm:text-sm">Share</span>
-                    </Button>
-                  </div>
+                <div>
+                  <Button
+                    onClick={handleShare}
+                    className="bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 font-comic border-2 border-white w-full">
+                    <Share className="mr-1 sm:mr-2 h-4 w-4" />
+                    <span className="text-xs sm:text-sm">Share</span>
+                  </Button>
                 </div>
 
                 <MintMeme
