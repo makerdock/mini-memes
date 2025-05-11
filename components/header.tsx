@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export function Header() {
   return (
-    <header className="flex flex-col items-center justify-between gap-4 mb-8 sm:flex-row">
+    <header className="flex flex-col items-center justify-between gap-4 mb-6 sm:flex-row">
       <div className="flex items-center gap-6">
         <div className="relative animate-spin-slow">
           <Image
