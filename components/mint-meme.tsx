@@ -59,11 +59,13 @@ export function MintMeme({ memeImage, topText }: MintMemeProps) {
         throw new Error(`Failed to upload: ${uploadData.error || "Unknown error"}`);
       }
 
-      setIpfsHash(uploadData.ipfsHash || "ipfs-hash-placeholder");
+      if (!uploadData.ipfsHash) {
+        throw new Error("some error with ipfs hash");
+      }
+
+      setIpfsHash(uploadData.ipfsHash);
 
       // Simulate Zora minting
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setTxHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef");
       setMintStatus("success");
     } catch (error) {
       console.error("Error minting:", error);

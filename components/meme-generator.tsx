@@ -1,18 +1,17 @@
 "use client";
 
+import { Plus, Share } from "lucide-react";
 import type React from "react";
-import { useState, useRef, useEffect } from "react";
-import { Button } from "../components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { MemeTemplateSelector } from "../components/meme-template-selector";
-import { MemeEditor, type CustomTextItem } from "../components/meme-editor";
-import { MintMeme } from "../components/mint-meme";
-import { memeTemplates } from "../lib/meme-templates";
-import { Download, Share, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { DraggableTextInput } from "../components/draggable-text-input";
-import { v4 as uuidv4 } from "../lib/uuid";
-import { useMediaQuery } from "../hooks/use-media-query";
+import { MemeEditor, type CustomTextItem } from "../components/meme-editor";
+import { MemeTemplateSelector } from "../components/meme-template-selector";
+import { MintMeme } from "../components/mint-meme";
+import { Button } from "../components/ui/button";
 import { Input } from '../components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { memeTemplates } from "../lib/meme-templates";
+import { v4 as uuidv4 } from "../lib/uuid";
 
 // Helper function to safely get placeholder text
 function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -66,7 +65,7 @@ export function MemeGenerator() {
   const [activeTab, setActiveTab] = useState("create");
   const editorRef = useRef<HTMLDivElement>(null);
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  // const isMobile = useMediaQuery("(max-width: 640px)");
 
   // Update canvas dimensions when the editor is mounted
   useEffect(() => {
@@ -143,6 +142,15 @@ export function MemeGenerator() {
   // Select a custom text item
   const selectCustomText = (id: string) => {
     setSelectedCustomTextId(id);
+  };
+
+  // @todo: get this done, mark done under comments when done
+  const handleShare = () => {
+    // get current image with mini meme as a water maker on bottom right
+
+    // upload it via nft.storage
+
+    // share it on farcaster as embed as an https url
   };
 
   const generateMeme = async () => {
@@ -335,7 +343,7 @@ export function MemeGenerator() {
                 <div className="p-4 bg-black/50 border-2 border-yellow-300 rounded-lg">
                   <h3 className="text-xl font-comic text-yellow-300 mb-4">Your Meme is Ready!</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <Button
+                    {/* <Button
                       onClick={() => {
                         // Create a temporary anchor element
                         const link = document.createElement("a");
@@ -349,8 +357,10 @@ export function MemeGenerator() {
                     >
                       <Download className="mr-1 sm:mr-2 h-4 w-4" />
                       <span className="text-xs sm:text-sm">Download</span>
-                    </Button>
-                    <Button className="bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 font-comic border-2 border-white">
+                    </Button> */}
+                    <Button
+                      onClick={handleShare}
+                      className="bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 font-comic border-2 border-white">
                       <Share className="mr-1 sm:mr-2 h-4 w-4" />
                       <span className="text-xs sm:text-sm">Share</span>
                     </Button>
