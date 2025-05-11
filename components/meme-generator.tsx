@@ -312,7 +312,7 @@ export function MemeGenerator() {
                 onCustomTextPositionChange={updateCustomTextPosition}
                 onCustomTextSizeChange={updateCustomTextSize}
                 onSelectCustomText={selectCustomText}
-                selectedCustomTextId={selectedCustomTextId}
+                selectedCustomTextId={selectedCustomTextId ?? undefined}
               />
             </div>
           </div>
