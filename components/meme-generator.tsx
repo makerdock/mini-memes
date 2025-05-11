@@ -322,7 +322,7 @@ export function MemeGenerator() {
           {generatedMeme ? (
             <div className="grid gap-6 md:grid-cols-2">
               <div className="flex flex-col items-center justify-center">
-                <div className="relative w-full aspect-square max-w-md mb-4">
+                <div className="relative w-full max-w-md mb-4">
                   <img
                     src={generatedMeme || "/placeholder.svg"}
                     alt="Generated meme"

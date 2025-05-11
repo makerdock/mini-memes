@@ -15,9 +15,9 @@ interface MintMemeProps {
   templateName: string;
 }
 
-export function MintMeme({ memeImage, topText, bottomText, templateName }: MintMemeProps) {
-  const [title, setTitle] = useState(`${templateName} Meme`);
-  const [description, setDescription] = useState(`A meme with "${topText}" and "${bottomText}"`);
+export function MintMeme({ memeImage, topText }: MintMemeProps) {
+  const [title, setTitle] = useState(topText);
+  const [description, setDescription] = useState("");
   const [minting, setMinting] = useState(false);
   const [mintStatus, setMintStatus] = useState<null | "success" | "error">(null);
   const [ipfsHash, setIpfsHash] = useState("");
