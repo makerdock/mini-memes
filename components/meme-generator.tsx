@@ -12,6 +12,7 @@ import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { memeTemplates } from "../lib/meme-templates";
 import { v4 as uuidv4 } from "../lib/uuid";
+import { sdk } from "@farcaster/frame-sdk";
 
 // Helper function to safely get placeholder text
 function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -144,13 +145,132 @@ export function MemeGenerator() {
     setSelectedCustomTextId(id);
   };
 
-  // @todo: get this done, mark done under comments when done
-  const handleShare = () => {
-    // get current image with mini meme as a water maker on bottom right
+  // Sharing functionality for social media - done by Claude
+  const handleShare = async () => {
+    if (!generatedMeme) return;
 
-    // upload it via nft.storage
+    try {
+      // Step 1: Add watermark to the image
+      const watermarkedImage = await addWatermark(generatedMeme);
 
-    // share it on farcaster as embed as an https url
+      // Step 2: Upload to NFT.storage
+      const uploadedUrl = await uploadToNFTStorage(watermarkedImage);
+
+      // Step 3: Share to Farcaster
+      shareToFarcaster(uploadedUrl);
+    } catch (error) {
+      console.error("Error sharing meme:", error);
+      alert("Failed to share your meme. Please try again.");
+    }
+  };
+
+  // Add watermark to image
+  const addWatermark = async (imageUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        // Create a canvas for the watermarked image
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("Failed to get canvas context"));
+          return;
+        }
+
+        // Draw the original image
+        ctx.drawImage(image, 0, 0);
+
+        // Add watermark text
+        ctx.font = "bold 16px Arial, sans-serif";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.textAlign = "end";
+        ctx.textBaseline = "bottom";
+
+        // Position in bottom right with padding
+        const watermarkText = "mini-memes.com";
+        const padding = 10;
+        ctx.fillText(watermarkText, canvas.width - padding, canvas.height - padding);
+
+        // Convert to data URL
+        const watermarkedDataUrl = canvas.toDataURL("image/png");
+        resolve(watermarkedDataUrl);
+      };
+
+      image.onerror = () => {
+        reject(new Error("Failed to load image for watermarking"));
+      };
+
+      image.src = imageUrl;
+    });
+  };
+
+  // Upload to NFT.storage
+  const uploadToNFTStorage = async (imageDataUrl: string): Promise<string> => {
+    try {
+      // Convert data URL to blob
+      const response = await fetch(imageDataUrl);
+      const blob = await response.blob();
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", blob, "meme.png");
+
+      // Add metadata
+      const metadata = JSON.stringify({
+        name: `Meme: ${topText || selectedTemplate.name}`,
+        keyvalues: {
+          description: `${topText} ${bottomText}`.trim(),
+          template: selectedTemplate.name,
+          createdAt: new Date().toISOString(),
+          app: "Mini-Memes",
+        },
+      });
+      formData.append("pinataMetadata", metadata);
+
+      // Add options
+      const options = JSON.stringify({
+        cidVersion: 0,
+      });
+      formData.append("pinataOptions", options);
+
+      // Create a file upload API route in the same project
+      const uploadResponse = await fetch("/api/upload-meme", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload meme");
+      }
+
+      const data = await uploadResponse.json();
+      return `https://gateway.ipfs.io/ipfs/${data.ipfsHash}`;
+    } catch (error) {
+      console.error("Error uploading to NFT.storage:", error);
+      throw error;
+    }
+  };
+
+  // Share to Farcaster
+  const shareToFarcaster = async (imageUrl: string) => {
+    try {
+
+
+      // Prepare the cast text with a description and hashtags
+      const text = `Check out my meme created with Mini-Memes! ${topText ? `"${topText}"` : ""} ${bottomText ? `"${bottomText}"` : ""} #minimemes #farcaster`;
+
+      // Compose a cast with the image as an embed
+      await sdk.actions.composeCast({
+        text,
+        embeds: [imageUrl],
+      });
+    } catch (error) {
+      console.error("Error sharing to Farcaster:", error);
+      alert("Failed to open Farcaster. Do you have the Farcaster app installed?");
+    }
   };
 
   const generateMeme = async () => {
