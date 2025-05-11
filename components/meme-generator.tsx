@@ -153,8 +153,8 @@ export function MemeGenerator() {
       // Step 1: Add watermark to the image
       const watermarkedImage = await addWatermark(generatedMeme);
 
-      // Step 2: Upload to NFT.storage
-      const uploadedUrl = await uploadToNFTStorage(watermarkedImage);
+      // Step 2: Upload to Vercel Blob
+      const uploadedUrl = await uploadMemeImage(watermarkedImage);
 
       // Step 3: Share to Farcaster
       shareToFarcaster(uploadedUrl);
@@ -207,49 +207,34 @@ export function MemeGenerator() {
     });
   };
 
-  // Upload to NFT.storage
-  const uploadToNFTStorage = async (imageDataUrl: string): Promise<string> => {
+  // Upload to Vercel Blob
+  const uploadMemeImage = async (imageDataUrl: string): Promise<string> => {
     try {
       // Convert data URL to blob
       const response = await fetch(imageDataUrl);
       const blob = await response.blob();
 
-      // Create form data
+      // Create form data with the file and metadata
       const formData = new FormData();
-      formData.append("file", blob, "meme.png");
+      formData.append("file", blob, `meme-${Date.now()}.png`);
+      formData.append("fileName", `meme-${selectedTemplate.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.png`);
+      formData.append("description", `${topText} ${bottomText}`.trim() || selectedTemplate.name);
 
-      // Add metadata
-      const metadata = JSON.stringify({
-        name: `Meme: ${topText || selectedTemplate.name}`,
-        keyvalues: {
-          description: `${topText} ${bottomText}`.trim(),
-          template: selectedTemplate.name,
-          createdAt: new Date().toISOString(),
-          app: "Mini-Memes",
-        },
-      });
-      formData.append("pinataMetadata", metadata);
-
-      // Add options
-      const options = JSON.stringify({
-        cidVersion: 0,
-      });
-      formData.append("pinataOptions", options);
-
-      // Create a file upload API route in the same project
+      // Upload via our API route
       const uploadResponse = await fetch("/api/upload-meme", {
         method: "POST",
         body: formData,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error("Failed to upload meme");
+        const errorData = await uploadResponse.json();
+        throw new Error(`Failed to upload meme: ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await uploadResponse.json();
-      return `https://gateway.ipfs.io/ipfs/${data.ipfsHash}`;
+      return data.url; // The URL from Vercel Blob
     } catch (error) {
-      console.error("Error uploading to NFT.storage:", error);
+      console.error("Error uploading meme:", error);
       throw error;
     }
   };
