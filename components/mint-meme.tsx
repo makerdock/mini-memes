@@ -7,32 +7,34 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Coins } from "lucide-react";
+import { useMemeStore } from '@/lib/stores/use-meme-store';
 
-interface MintMemeProps {
-  memeImage: string;
-  topText: string;
-  bottomText: string;
-  templateName: string;
-}
-
-export function MintMeme({ memeImage, topText }: MintMemeProps) {
-  const [title, setTitle] = useState(topText);
+export function MintMeme() {
+  // const [title, setTitle] = useState(topText);
+  const { generatedMeme: memeImage, selectedTemplate } = useMemeStore();
   const [description, setDescription] = useState("");
   const [minting, setMinting] = useState(false);
   const [mintStatus, setMintStatus] = useState<null | "success" | "error">(null);
   const [ipfsHash, setIpfsHash] = useState("");
-  const [txHash, setTxHash] = useState("");
+  const [txHash] = useState("");
+
+  const title = selectedTemplate.textOverlays[0].text;
 
   const handleMint = async () => {
     if (minting) return;
+
+    if (!memeImage) {
+      throw new Error("No meme image found");
+    }
 
     try {
       setMinting(true);
       setMintStatus(null);
 
+
       // Convert data URL to blob if it's a data URL
       let imageBlob;
-      if (memeImage.startsWith("data:")) {
+      if (memeImage?.startsWith("data:")) {
         const response = await fetch(memeImage);
         imageBlob = await response.blob();
       } else {
@@ -77,7 +79,7 @@ export function MintMeme({ memeImage, topText }: MintMemeProps) {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e && e.target) {
-      setTitle(e.target.value);
+      // setTitle(e.target.value);
     }
   };
 

@@ -5,12 +5,12 @@ import Image from "next/image";
 import { Button } from "../components/ui/button";
 import { PenLine } from "lucide-react";
 import { cn } from "../lib/utils";
-import type { memeTemplates } from "../lib/meme-templates";
+import type { MEME_TEMPLATES } from "../lib/meme-templates";
 
 interface MemeTemplateSelectorProps {
-  templates: typeof memeTemplates;
-  selectedTemplate: (typeof memeTemplates)[0];
-  onSelect: (template: (typeof memeTemplates)[0]) => void;
+  templates: typeof MEME_TEMPLATES;
+  selectedTemplate: (typeof MEME_TEMPLATES)[0];
+  onSelect: (template: (typeof MEME_TEMPLATES)[0]) => void;
   onNextClick?: () => void;
 }
 
@@ -33,7 +33,7 @@ export function MemeTemplateSelector({
   }, [selectedTemplate]);
 
   // Safely compare template IDs (handling both string and number types)
-  const isSelected = (template: (typeof memeTemplates)[0]) => {
+  const isSelected = (template: (typeof MEME_TEMPLATES)[0]) => {
     if (!selectedTemplate) return false;
     return String(template.id) === String(selectedTemplate.id);
   };
@@ -55,8 +55,8 @@ export function MemeTemplateSelector({
             onClick={() => onSelect(template)}
           >
             <Image
-              src={template.url || "/placeholder.svg"}
-              alt={template.name}
+              src={template.imageUrl || "/placeholder.svg"}
+              alt={template.templateId}
               fill
               className="object-cover aspect-square h-full w-full"
             />
