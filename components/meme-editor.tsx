@@ -303,46 +303,35 @@ export function MemeEditor({
   const handleTitleChange: ChangeEventHandler<HTMLInputElement> = e => {
     const value = e.target.value;
     const name = e.target.name;
-    console.log(name, value);
+    console.log({ value, name });
+    updateActiveTextbox(name, { text: value });
   };
 
   return (
     <div
-      ref={containerRef}
       className={`relative w-full ${preview ? "" : "border-4 border-dashed border-pink-400 p-2 rounded-lg"}`}
     >
-      <canvas ref={canvasRef} className="w-full h-auto rounded-md shadow-neon" />
 
-      {/* Render draggable custom text elements */}
-      {/* {imageLoaded &&
-        customTextItems.map((item) => (
-          <DraggableText
-            key={item.areaId}
-            id={item.areaId}
-            text={item.text}
-            initialX={item.x}
-            initialY={item.y}
-            initialSize={item.size}
-            canvasWidth={canvasDimensions.width}
-            canvasHeight={canvasDimensions.height}
-            onPositionChange={updateCustomTextPosition}
-            onSizeChange={updateCustomTextSize}
-            selected={selectedCustomTextId === item.areaId}
-            onSelect={selectCustomText}
-          />
-        ))} */}
+      <div
+        ref={containerRef}
+        className='h-fit w-fit bg-red-400'
+      >
+        <canvas ref={canvasRef} className="w-full h-auto rounded-md shadow-neon" />
 
-      {customTextItems.map(item =>
-        <DraggableTextBox
-          key={item.areaId}
-          containerRef={containerRef}
-          updateCustomTextPosition={updateCustomTextPosition}
-          updateCustomTextSize={updateCustomTextSize}
-          selectCustomText={selectCustomText}
-          item={item}
-          selected={selectedCustomTextId === item.areaId}
-        />
-      )}
+        <div className="absolute top-0 left-0 flex items-center">
+          {customTextItems.map(item =>
+            <DraggableTextBox
+              key={item.areaId}
+              containerRef={containerRef}
+              updateCustomTextPosition={updateCustomTextPosition}
+              updateCustomTextSize={updateCustomTextSize}
+              selectCustomText={selectCustomText}
+              item={item}
+              selected={selectedCustomTextId === item.areaId}
+            />
+          )}
+        </div>
+      </div>
 
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-md">

@@ -28,7 +28,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         const currTemplate = get().selectedTemplate;
         const updatedTemplate = {
             ...currTemplate,
-            textItems: currTemplate.textOverlays.map((item) => {
+            textOverlays: currTemplate.textOverlays.map((item) => {
                 if (item.areaId === id) {
                     return {
                         ...item,

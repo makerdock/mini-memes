@@ -24,7 +24,7 @@ const DraggableTextBox: React.FC<DraggableTextBoxProps> = ({
     const handleIncreaseSize = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        const newSize = Math.min(item.size + 4, 72); // Max size 72px
+        const newSize = Math.min(item.size + 8, 72); // Max size 72px
         // setFontSize(newSize);
         updateCustomTextSize(item.areaId, newSize);
     };
@@ -32,20 +32,22 @@ const DraggableTextBox: React.FC<DraggableTextBoxProps> = ({
     const handleDecreaseSize = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        const newSize = Math.max(item.size - 4, 12); // Min size 12px
+        const newSize = Math.max(item.size - 8, 12); // Min size 12px
         // setFontSize(newSize);
         updateCustomTextSize(item.areaId, newSize);
     };
 
     return (
-        <motion.div
+        <motion.span
             drag
             key={item.areaId}
             onClick={() => selectCustomText(item.areaId)}
             dragControls={controls}
+            dragMomentum={false}
+            // initial={{ x: item.x, y: item.y }}
             dragConstraints={containerRef}
             onPointerDown={() => updateCustomTextPosition(item.areaId, item.x, item.y)}
-            className='relative'
+            className='relative inline-block bg-red-100'
         >
             {selected && (
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-black/70 rounded-md p-1">
@@ -65,8 +67,10 @@ const DraggableTextBox: React.FC<DraggableTextBoxProps> = ({
                     </button>
                 </div>
             )}
-            <span>{item.text}</span>
-        </motion.div>
+            <span
+                style={{ fontSize: item.size }}
+                className='font-impact font-outline-2 uppercase'>{item.text}</span>
+        </motion.span>
     );
 };
 

@@ -73,4 +73,11 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  .font-outline-2 {
+    -webkit-text-stroke: 1.5px black;
+  }
+  .font-outline-4 {
+    -webkit-text-stroke: 4px black;
+  }
 }
