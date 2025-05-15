@@ -37,6 +37,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
       fabricImage.onload = resolve;
     });
     // create a new Fabric.js image instance from the blob
+    // 
+    // @ts-ignore 
     const img = new FabricImage(fabricImage);
     img.set({
       selectable: false,
@@ -104,9 +106,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
           // disable resizing
           lockScalingX: true,
           lockScalingY: true,
-          // remove control points when selected
+          // hide control points
           hasControls: false,
-          // remove the dots to scale
+          hasBorders: false,
+          // keep origin points
           originX: 'left',
           originY: 'top',
         }));

@@ -12,8 +12,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 194.8828125,
-        "y": 301.5
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "girlfriend",
@@ -21,8 +21,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 277.62109375,
-        "y": 337.984375
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "other-girl",
@@ -30,8 +30,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 104.625,
-        "y": 182.84765625
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -48,8 +48,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 267.53515625,
-        "y": 321.12890625
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "bottom-text",
@@ -57,8 +57,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 285.84765625,
-        "y": 469.75390625
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -75,8 +75,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 115.25,
-        "y": 397.3828125
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "cat",
@@ -84,8 +84,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 278.73046875,
-        "y": 399.890625
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -156,8 +156,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 131.1328125,
-        "y": 351.78515625
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "padme-line1",
@@ -165,8 +165,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 274.7421875,
-        "y": 356.68359375
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "padme-line2",
@@ -174,8 +174,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 287.87109375,
-        "y": 504.109375
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -192,8 +192,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 24,
         "color": "#ffffff",
-        "x": 124.390625,
-        "y": 282.08984375
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "right-button",
@@ -201,8 +201,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 24,
         "color": "#ffffff",
-        "x": 246.234375,
-        "y": 269.26171875
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -219,8 +219,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 16,
         "color": "#ffffff",
-        "x": 184.73828125,
-        "y": 363.75
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "astronaut2",
@@ -228,8 +228,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 16,
         "color": "#ffffff",
-        "x": 326.58984375,
-        "y": 383.8125
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -246,8 +246,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 313.22265625,
-        "y": 333.37109375
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "caption",
@@ -255,8 +255,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 32,
         "color": "#ffffff",
-        "x": 131.15625,
-        "y": 477.98828125
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),
@@ -273,8 +273,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 16,
         "color": "#ffffff",
-        "x": 141,
-        "y": 313.55859375
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "left-sign",
@@ -282,8 +282,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 16,
         "color": "#ffffff",
-        "x": 228.48046875,
-        "y": 297.828125
+        "x": 50,
+        "y": 50
       },
       {
         "areaId": "right-sign",
@@ -291,8 +291,8 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
         "font": "Impact",
         "size": 24,
         "color": "#ffffff",
-        "x": 191.0625,
-        "y": 482.8828125
+        "x": 50,
+        "y": 50
       }
     ],
     createdAt: new Date(),

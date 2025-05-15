@@ -4,6 +4,7 @@
     "@typescript-eslint/no-unused-vars": "off",
     "react-hooks/exhaustive-deps": "off",
     "@next/next/no-img-element": "off",
+    "@typescript-eslint/ban-ts-comment": ["warn", {"ts-ignore": "allow-with-description"}],
     "@typescript-eslint/no-explicit-any": "off"
   }
 }
