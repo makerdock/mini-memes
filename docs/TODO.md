@@ -5,67 +5,59 @@
 - [x] Define text areas and positions for each template
 - [x] Prepare default text content for templates
 
-## Meme Editor Screen (Hour 4-7)
-- [ ] Implement canvas-based editor component
-- [ ] Create text positioning system based on template metadata
-- [ ] Build text input controls for each text area
-- [ ] Add text size adjustment functionality
-- [ ] Implement "Add Text" feature for additional text boxes
-- [ ] Create preview button and navigation
-- [ ] Build image generation functionality (canvas to image)
+## Meme Editor 
+ - [x] Implement when an text box is active then, it should update in the useEditorState
+ - [x] When a text box is active then, user should see a toolbox with stick bottom
+ - [x] the toolbox should have input to change the text and up and down arrow to change the font size
+ - [x] the text inside should always in be capital
+ - [x] as the user type more, it should update the font size, like writing more shoukd decrease the font size and wrap the text to the next line. this is similar code to achive the same effect
+```
+ function wrapText(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    lineHeight: number,
+    isBottom = false,
+  ) {
+    if (!text) return
 
-## Preview & Share Screen (Hour 7-9)
-- [x] Create preview component showing final meme
-- [x] Implement sharing options UI
-- [x] Build Farcaster posting integration:
-  - Connect to Farcaster API
-  - Handle authentication
-  - Implement post creation
-- [ ] Add basic Zora minting functionality:
-  - Connect to Zora API
-  - Implement simple minting process
-- [ ] Set up DM request functionality
+    const words = text.split(" ")
+    let line = ""
+    const lines: string[] = []
 
-## Backend Integration (Hour 9-11)
-- [ ] Set up serverless functions for API endpoints
-- [ ] Implement image storage solution (temporary for MVP)
-- [ ] Connect frontend to all API endpoints
-- [ ] Test integration with Farcaster
-- [ ] Test integration with Zora (simplified)
-- [ ] Implement basic error handling
+    // Break into lines
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + " "
+      const metrics = ctx.measureText(testLine)
+      const testWidth = metrics.width
 
-## Testing & Polishing (Hour 11-12)
-- [ ] Test complete user flow
-- [ ] Fix critical bugs
-- [ ] Optimize performance for mobile
-- [ ] Add loading states and basic error messages
-- [ ] Implement simple analytics tracking
-- [ ] Final UI adjustments and polish
+      if (testWidth > maxWidth && n > 0) {
+        lines.push(line)
+        line = words[n] + " "
+      } else {
+        line = testLine
+      }
+    }
 
+    if (line.trim()) {
+      lines.push(line)
+    }
 
-## Tech Stack for One-Day MVP
-- **Frontend**: Next.js, React, TailwindCSS
-- **Canvas Manipulation**: fabric.js (lightweight and easy to implement)
-- **Farcaster Integration**: Farcaster Frames SDK
-- **Zora Integration**: Zora API with minimal configuration
-- **Image Storage**: Vercel Blob Storage (simple setup)
-- **Deployment**: Vercel (one-click deployment from GitHub)
+    // Adjust y position for bottom text to start from bottom
+    if (isBottom && lines.length > 1) {
+      y -= lineHeight * (lines.length - 1)
+    }
 
-## Critical Features vs Nice-to-Have
-### Critical (Must Complete)
-- Template gallery with selection
-- Basic text editing on predefined areas
-- Image generation
-- Farcaster posting
+    // Draw each line
+    for (let i = 0; i < lines.length; i++) {
+      const lineY = isBottom ? y + i * lineHeight : y + i * lineHeight
+      ctx.strokeText(lines[i], x, lineY)
+      ctx.fillText(lines[i], x, lineY)
+    }
+  }
+  ```
 
-### Nice-to-Have (Complete if Time Allows)
-- Zora minting
-- DM delivery
-- Additional text customization
-- Recently used templates
-
-## Simplified Architecture for MVP
-1. **Static Frontend** - Next.js app with client-side rendering
-2. **Serverless Functions** - Handle image generation and API integrations
-3. **Temporary Storage** - Store generated images briefly
-4. **External APIs** - Connect to Farcaster and Zora
+ - [ ] it should by default active the first text box
+ 

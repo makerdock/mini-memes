@@ -1,15 +1,16 @@
 "use client";
 
 import { sdk } from "@farcaster/frame-sdk";
-import { MoveLeft, Share } from "lucide-react";
+import { ArrowDown, ArrowUp, MoveLeft, Share } from "lucide-react";
 
+import { MEME_TEMPLATES } from '@/lib/meme-templates';
+import { useMemeStore } from '@/stores/use-meme-store';
+import { useEditorStore } from '@/stores/useEditorStore';
+import EditorCanvas from './EditorCanvas';
 import { MemeTemplateSelector } from "./meme-template-selector";
 import { MintMeme } from "./mint-meme";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent } from "./ui/tabs";
-import { useMemeStore } from '@/stores/use-meme-store';
-import { MEME_TEMPLATES } from '@/lib/meme-templates';
-import EditorCanvas from './EditorCanvas';
 
 // Helper function to safely get placeholder text
 // function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -76,27 +77,13 @@ export function MemeBuilder() {
     generatedMeme,
     activeTab,
     setSelectedTemplate,
-    setActiveTab
+    setActiveTab,
+    updateActiveTextbox
   } = useMemeStore();
+  const { activeTextId } = useEditorStore();
+  console.log("🚀 ~ MemeBuilder ~ activeTextId:", activeTextId);
 
-  // Remove these lines
-  // const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate>(MEME_TEMPLATES[0]);
-  // const [customTextItems, setCustomTextItems] = useState<CustomTextItem[]>([]);
-  // const [selectedCustomTextId, setSelectedCustomTextId] = useState<string | null>(null);
-  // const [generatedMeme, setGeneratedMeme] = useState<string | null>(null);
-  // const [activeTab, setActiveTab] = useState("create");
-  // const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
-  // const isMobile = useMediaQuery("(max-width: 640px)");
-
-  // Update canvas dimensions when the editor is mounted
-  // useEffect(() => {
-  //   if (editorRef.current) {
-  //     const canvas = editorRef.current.querySelector("canvas");
-  //     if (canvas) {
-  //       setCanvasDimensions({ width: canvas.width, height: canvas.height });
-  //     }
-  //   }
-  // }, [selectedTemplate]);
+  const textOverlays = selectedTemplate.textOverlays;
 
   const handleTemplateSelect = (template: (typeof MEME_TEMPLATES)[0]) => {
     setSelectedTemplate(template);
@@ -122,12 +109,12 @@ export function MemeBuilder() {
   //   };
 
   //   setCustomTextItems([...customTextItems, newItem]);
-  //   setSelectedCustomTextId(newItem.id);
+  //   setSelectedCustomTextId(newitem.areaId);
   // };
 
   // // Remove a custom text item
   // const removeCustomTextItem = (id: string) => {
-  //   setCustomTextItems(customTextItems.filter((item) => item.id !== id));
+  //   setCustomTextItems(customTextItems.filter((item) => item.areaId !== id));
   //   if (selectedCustomTextId === id) {
   //     setSelectedCustomTextId(null);
   //   }
@@ -135,7 +122,7 @@ export function MemeBuilder() {
 
   // // Update custom text content
   // const updateCustomTextContent = (id: string, text: string) => {
-  //   setCustomTextItems(customTextItems.map((item) => (item.id === id ? { ...item, text } : item)));
+  //   setCustomTextItems(customTextItems.map((item) => (item.areaId === id ? { ...item, text } : item)));
   // };
 
   // Sharing functionality for social media - done by Claude
@@ -296,9 +283,74 @@ export function MemeBuilder() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-
             <div className="relative flex items-center justify-center mt-4 md:mt-0">
-              <EditorCanvas template={selectedTemplate} />
+              <EditorCanvas
+                template={selectedTemplate}
+              // activeTextId={activeTextId}
+              // setActiveTextId={setActiveTextId}
+              // textItems={textItems}
+              // setTextItems={setTextItems}
+              />
+              {activeTextId && (
+                <div className="fixed bottom-4 left-0 right-0 mx-auto w-full max-w-md bg-black/80 backdrop-blur-sm border-2 border-cyan-400 rounded-lg p-4 z-50">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={textOverlays.find(item => item.areaId === activeTextId)?.text || ''}
+                      onChange={(e) => {
+                        const newText = e.target.value.toUpperCase();
+                        const activeItem = textOverlays.find(item => item.areaId === activeTextId);
+                        if (activeItem) {
+                          const textLength = newText.length;
+                          const baseSize = 24;
+                          const adjustedSize = Math.max(12, baseSize - Math.floor(textLength / 5));
+
+                          updateActiveTextbox(activeTextId, {
+                            text: newText,
+                            size: adjustedSize
+                          });
+
+                          // updateActiveTextbox(textOverlays.map(item =>
+                          //   item.areaId === activeTextId ? {
+                          //     ...item,
+                          //     text: newText,
+                          //     size: adjustedSize
+                          //   } : item
+                          // ));
+                        }
+                      }}
+                      className="flex-1 bg-transparent border-b border-cyan-400 focus:outline-none text-white"
+                      placeholder="Enter meme text"
+                    />
+                    <button
+                      onClick={() => {
+                        const activeItem = textOverlays.find(item => item.areaId === activeTextId);
+                        if (activeItem) {
+                          updateActiveTextbox(activeTextId, {
+                            size: Math.min(40, activeItem.size + 2)
+                          });
+                        }
+                      }}
+                      className="p-2 text-cyan-400 hover:text-white"
+                    >
+                      <ArrowUp />
+                    </button>
+                    <button
+                      onClick={() => {
+                        const activeItem = textOverlays.find(item => item.areaId === activeTextId);
+                        if (activeItem) {
+                          updateActiveTextbox(activeTextId, {
+                            size: Math.max(12, activeItem.size - 2)
+                          });
+                        }
+                      }}
+                      className="p-2 text-cyan-400 hover:text-white"
+                    >
+                      <ArrowDown />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>

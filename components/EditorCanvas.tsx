@@ -18,10 +18,7 @@ interface EditorCanvasProps {
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
   const { editor, onReady } = useFabricJSEditor();
-  console.log("🚀 ~ editor:", editor);
-  const { setCanvas } = useEditorStore();
-  // const { selectedSize } = useCanvasStore();
-  // const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const { setCanvas, setActiveTextId } = useEditorStore();
 
   const setBackground = async (canvas: Canvas, imageUrl: string) => {
     // fetch the image from the template
@@ -112,6 +109,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
           // keep origin points
           originX: 'left',
           originY: 'top',
+
+          data: {
+            areaId: textBox.areaId,
+          }
         }));
       });
 
@@ -121,10 +122,27 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     }
   };
 
+
   useEffect(() => {
     if (editor) {
       setCanvas(editor.canvas);
     }
+
+    // add a listener foor when an object is active
+    editor?.canvas.on('selection:created', (e) => {
+      const selectedObject = e.selected?.[0];
+      console.log("🚀 ~ editor?.canvas.on ~ e.selected:", e.selected);
+      console.log("🚀 ~ editor?.canvas.on ~ selectedObject:", selectedObject);
+      console.log("🚀 ~ editor?.canvas.on ~ selectedObject.data.areaId:", selectedObject.data.areaId);
+
+      if (selectedObject && selectedObject.data?.areaId) {
+        setActiveTextId(selectedObject.data.areaId);
+      }
+    });
+
+    editor?.canvas.on('selection:cleared', () => {
+      setActiveTextId(null);
+    });
   }, [editor, setCanvas]);
 
   return (
