@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// Using the new Route Segment Config
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +27,7 @@ export async function POST(request: Request) {
       access: 'public',
       addRandomSuffix: true, // Add a random suffix to avoid name collisions
       contentType: file.type,
-      meta: { description }, // Store description as metadata
+      // Remove meta as it's not supported in the current version
     });
     
     // Return success with the URL of the uploaded file

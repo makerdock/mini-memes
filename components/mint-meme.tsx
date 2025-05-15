@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Coins } from "lucide-react";
-import { useMemeStore } from '@/lib/stores/use-meme-store';
+import { useMemeStore } from '@/stores/use-meme-store';
 
 export function MintMeme() {
   // const [title, setTitle] = useState(topText);
