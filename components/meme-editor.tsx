@@ -300,11 +300,69 @@ export function MemeEditor({
     setSelectedCustomTextId(id);
   };
 
+  function wrapText(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    lineHeight: number,
+    isBottom = false,
+  ) {
+    if (!text) return;
+
+    const words = text.split(" ");
+    let line = "";
+    const lines: string[] = [];
+
+    // Break into lines
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + " ";
+      const metrics = ctx.measureText(testLine);
+      const testWidth = metrics.width;
+
+      if (testWidth > maxWidth && n > 0) {
+        lines.push(line);
+        line = words[n] + " ";
+      } else {
+        line = testLine;
+      }
+    }
+
+    if (line.trim()) {
+      lines.push(line);
+    }
+
+    // Adjust y position for bottom text to start from bottom
+    if (isBottom && lines.length > 1) {
+      y -= lineHeight * (lines.length - 1);
+    }
+
+    // Draw each line
+    for (let i = 0; i < lines.length; i++) {
+      const lineY = isBottom ? y + i * lineHeight : y + i * lineHeight;
+      ctx.strokeText(lines[i], x, lineY);
+      ctx.fillText(lines[i], x, lineY);
+    }
+  }
+
   const handleTitleChange: ChangeEventHandler<HTMLInputElement> = e => {
     const value = e.target.value;
     const name = e.target.name;
     console.log({ value, name });
     updateActiveTextbox(name, { text: value });
+
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+
+    if (!ctx || !canvas) {
+      return;
+    }
+
+    const currTextbox = selectedTemplate.textOverlays.find(textbox => textbox.areaId === name);
+    if (!currTextbox) return;
+
+    wrapText(ctx, value.toUpperCase(), currTextbox?.x, currTextbox?.y, canvas?.width * 0.9, currTextbox.size * 1.2);
   };
 
   return (
@@ -314,23 +372,21 @@ export function MemeEditor({
 
       <div
         ref={containerRef}
-        className='h-fit w-fit bg-red-400'
+        className='h-fit w-fit bg-red-400 relative'
       >
         <canvas ref={canvasRef} className="w-full h-auto rounded-md shadow-neon" />
 
-        <div className="absolute top-0 left-0 flex items-center">
-          {customTextItems.map(item =>
-            <DraggableTextBox
-              key={item.areaId}
-              containerRef={containerRef}
-              updateCustomTextPosition={updateCustomTextPosition}
-              updateCustomTextSize={updateCustomTextSize}
-              selectCustomText={selectCustomText}
-              item={item}
-              selected={selectedCustomTextId === item.areaId}
-            />
-          )}
-        </div>
+        {customTextItems.map(item =>
+          <DraggableTextBox
+            key={item.areaId}
+            containerRef={containerRef}
+            updateCustomTextPosition={updateCustomTextPosition}
+            updateCustomTextSize={updateCustomTextSize}
+            selectCustomText={selectCustomText}
+            item={item}
+            selected={selectedCustomTextId === item.areaId}
+          />
+        )}
       </div>
 
       {error && (

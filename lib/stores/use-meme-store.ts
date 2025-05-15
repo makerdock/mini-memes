@@ -25,6 +25,8 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
     setGeneratedMeme: (meme) => set({ generatedMeme: meme }),
     setActiveTab: (tab) => set({ activeTab: tab }),
     updateActiveTextbox: (id, updates) => {
+        console.log("🚀 ~ updates:", updates);
+
         const currTemplate = get().selectedTemplate;
         const updatedTemplate = {
             ...currTemplate,
@@ -39,6 +41,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
             })
         };
 
+        console.log("🚀 ~ updatedTemplate:", updatedTemplate);
         set({ selectedTemplate: updatedTemplate });
     }
 }));
