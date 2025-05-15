@@ -4,34 +4,39 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "1",
     templateId: "distracted-boyfriend",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "boyfriend",
-        "text": "1",
+        "areaId": "randomid",
+        "fontSize": 40,
+        "text": " ETH balance",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 45.199999999999996,
+        "width": 204.04296875,
+        "color": "white",
+        "x": 348.1810995968133,
+        "y": 326.01945356852156
       },
       {
-        "areaId": "girlfriend",
-        "text": "2",
+        "areaId": "randomid",
+        "fontSize": 40,
+        "text": "FC Notification",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 45.199999999999996,
+        "width": 237.34375,
+        "color": "white",
+        "x": 31.88249748703595,
+        "y": 323.32579999298866
       },
       {
-        "areaId": "other-girl",
-        "text": "3",
+        "areaId": "randomid",
+        "fontSize": 40,
+        "text": "My empty wallet",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 45.199999999999996,
+        "width": 265.15625,
+        "color": "white",
+        "x": 244.29670145537546,
+        "y": 259.10243648275446
       }
     ],
     createdAt: new Date(),
@@ -40,25 +45,28 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "2",
     templateId: "drake-hotline-bling",
-    userId: "system",
-    textOverlays: [
+    "textOverlays": [
       {
-        "areaId": "top-text",
-        "text": "nope",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Building on L1",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 179.375,
+        "color": "white",
+        "x": 341,
+        "y": 142
       },
       {
-        "areaId": "bottom-text",
-        "text": "dope",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Building on \nFarcaster",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 78.10559999999998,
+        "width": 155.015625,
+        "color": "white",
+        "x": 351,
+        "y": 428
       }
     ],
     createdAt: new Date(),
@@ -67,25 +75,28 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "3",
     templateId: "woman-yelling-at-cat",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "woman",
-        "text": "asd",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "web3 is dead",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 172.21875,
+        "color": "white",
+        "x": 49,
+        "y": 293.715430776734
       },
       {
-        "areaId": "cat",
-        "text": "asdas",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "My Farcaster frame\ngetting 10k users",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 78.10559999999998,
+        "width": 251.3125,
+        "color": "white",
+        "x": 308,
+        "y": 274.7375898555949
       }
     ],
     createdAt: new Date(),
@@ -94,25 +105,28 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "4",
     templateId: "fancy-winnie-the-pooh",
-    userId: "system",
     textOverlays: [
       {
-        areaId: "regular",
-        text: "",
-        font: "Impact",
-        size: 32,
-        color: "#ffffff",
-        x: 294.07421875,
-        y: 313.66015625
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Using traditional \nsocial media",
+        "font": "Impact",
+        "height": 78.10559999999998,
+        "width": 225.15625,
+        "color": "white",
+        "x": 293.07421875,
+        "y": 70.73315114336135
       },
       {
-        areaId: "fancy",
-        text: "",
-        font: "Impact",
-        size: 32,
-        color: "#ffffff",
-        x: 268.24609375,
-        y: 471.62890625
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Using Farcaster",
+        "font": "Impact",
+        "height": 36.16,
+        "width": 205.1875,
+        "color": "white",
+        "x": 309.24609375,
+        "y": 305.5372871451637
       }
     ],
     createdAt: new Date(),
@@ -121,7 +135,6 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   // {
   //   id: "5",
   //   templateId: "disaster-girl",
-  //   userId: "system",
   //   textOverlays: [
   //     {
   //       areaId: "top-captio",
@@ -148,34 +161,39 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "6",
     templateId: "anakin-and-padme",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "anakin-line1",
-        "text": "dasd",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "You minted an NFT",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 234.28125,
+        "color": "white",
+        "x": 19,
+        "y": 238
       },
       {
-        "areaId": "padme-line1",
-        "text": "asdasd",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "For the art right?",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 218.375,
+        "color": "white",
+        "x": 324,
+        "y": 240
       },
       {
-        "areaId": "padme-line2",
+        "areaId": "randomid",
+        "fontSize": 32,
         "text": "Right?",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 85.90625,
+        "color": "white",
+        "x": 387,
+        "y": 522
       }
     ],
     createdAt: new Date(),
@@ -184,25 +202,28 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "7",
     templateId: "sweating-button-choice",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "left-button",
-        "text": "option 1",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Buy the dip",
         "font": "Impact",
-        "size": 24,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 144.890625,
+        "color": "white",
+        "x": 85,
+        "y": 110.99119133574008
       },
       {
-        "areaId": "right-button",
-        "text": "option 2",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Sell the dip",
         "font": "Impact",
-        "size": 24,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 146.59375,
+        "color": "white",
+        "x": 266,
+        "y": 77.99595667870037
       }
     ],
     createdAt: new Date(),
@@ -211,25 +232,28 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "8",
     templateId: "always-has-been",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "astronaut1",
+        "areaId": "randomid",
+        "fontSize": 32,
         "text": "Wait, it's all...",
         "font": "Impact",
-        "size": 16,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 169.1875,
+        "color": "white",
+        "x": 210,
+        "y": 218.86868686868684
       },
       {
-        "areaId": "astronaut2",
+        "areaId": "randomid",
+        "fontSize": 32,
         "text": "Always has been",
         "font": "Impact",
-        "size": 16,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 217.28125,
+        "color": "white",
+        "x": 344,
+        "y": 278.82206682206686
       }
     ],
     createdAt: new Date(),
@@ -238,25 +262,28 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "9",
     templateId: "is-this-a-butterfly",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "butterfly",
-        "text": "asd",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Is this my retirement fund?",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 353.984375,
+        "color": "white",
+        "x": 80,
+        "y": 457.63993792033114
       },
       {
-        "areaId": "caption",
-        "text": "Is this...",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Memecoin",
         "font": "Impact",
-        "size": 32,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 138.015625,
+        "color": "white",
+        "x": 414,
+        "y": 143.91704452086063
       }
     ],
     createdAt: new Date(),
@@ -265,34 +292,39 @@ export const MEME_TEMPLATES: MemeTemplate[] = [
   {
     id: "10",
     templateId: "left-exit-12-off-ramp",
-    userId: "system",
     textOverlays: [
       {
-        "areaId": "car",
-        "text": "left sign",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "COIN IT",
         "font": "Impact",
-        "size": 16,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 91.359375,
+        "color": "white",
+        "x": 307,
+        "y": 130.9744867279443
       },
       {
-        "areaId": "left-sign",
-        "text": "right sing",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "POSTING\nCONTENT",
         "font": "Impact",
-        "size": 16,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 78.10559999999998,
+        "width": 112.65625,
+        "color": "white",
+        "x": 97,
+        "y": 108.98141625862615
       },
       {
-        "areaId": "right-sign",
-        "text": "car",
+        "areaId": "randomid",
+        "fontSize": 32,
+        "text": "Me",
         "font": "Impact",
-        "size": 24,
-        "color": "#ffffff",
-        "x": 50,
-        "y": 50
+        "height": 36.16,
+        "width": 39.296875,
+        "color": "white",
+        "x": 263,
+        "y": 391.892277295765
       }
     ],
     createdAt: new Date(),

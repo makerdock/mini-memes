@@ -2,7 +2,7 @@
 
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
-import { Image as FabricImage, Text as FabricText, type Canvas } from 'fabric';
+import { FabricImage, IText, type Canvas } from 'fabric';
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
 import { useEffect } from 'react';
 import { MemeTemplate } from './MemeBuilder';
@@ -86,34 +86,46 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
 
       // add the text boxes to the canvas
       template?.textOverlays.forEach((textBox) => {
-        canvas.add(new FabricText(textBox.text, {
+        const textBoxInstance = new IText(textBox.text, {
           left: textBox.x,
           top: textBox.y,
-          fontSize: textBox.size,
+          height: textBox.height,
+          width: textBox.width,
           fontFamily: 'Impact',
           fill: 'white',
           stroke: 'black',
           strokeWidth: 2,
           strokeLineCap: 'round',
           strokeLineJoin: 'round',
+          fontSize: textBox.fontSize ?? 32,
           // preserve aspect ratio
           scaleX: 1,
           scaleY: 1,
-          lockUniScaling: true,
-          // disable resizing
-          lockScalingX: true,
-          lockScalingY: true,
-          // hide control points
-          hasControls: false,
-          hasBorders: false,
+          // Lock uniform scaling to maintain aspect ratio
+          lockUniScaling: false,
+          // Force proportional scaling
+          lockScalingFlip: true,
           // keep origin points
           originX: 'left',
           originY: 'top',
 
+          // Add border and corner styling
+          borderColor: 'black',
+          cornerColor: 'black',
+          cornerStyle: 'circle',
+          cornerSize: 12,
+          transparentCorners: false,
+
           data: {
             areaId: textBox.areaId,
           }
-        }));
+        });
+        if (textBox.height) {
+          textBoxInstance.height = textBox.height;
+          textBoxInstance.width = textBox.width;
+        }
+
+        canvas.add(textBoxInstance);
       });
 
       onReady(canvas);
@@ -127,22 +139,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     if (editor) {
       setCanvas(editor.canvas);
     }
-
-    // add a listener foor when an object is active
-    editor?.canvas.on('selection:created', (e) => {
-      const selectedObject = e.selected?.[0];
-      console.log("🚀 ~ editor?.canvas.on ~ e.selected:", e.selected);
-      console.log("🚀 ~ editor?.canvas.on ~ selectedObject:", selectedObject);
-      console.log("🚀 ~ editor?.canvas.on ~ selectedObject.data.areaId:", selectedObject.data.areaId);
-
-      if (selectedObject && selectedObject.data?.areaId) {
-        setActiveTextId(selectedObject.data.areaId);
-      }
-    });
-
-    editor?.canvas.on('selection:cleared', () => {
-      setActiveTextId(null);
-    });
   }, [editor, setCanvas]);
 
   return (

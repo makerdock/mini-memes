@@ -11,6 +11,7 @@ import { MemeTemplateSelector } from "./meme-template-selector";
 import { MintMeme } from "./mint-meme";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent } from "./ui/tabs";
+import { IText } from 'fabric';
 
 // Helper function to safely get placeholder text
 // function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -57,7 +58,9 @@ export interface MemeText {
   areaId: string;
   text: string;
   font: string;
-  size: number;
+  height: number;
+  width: number;
+  fontSize: number;
   color: string;
   x: number;
   y: number;
@@ -65,9 +68,8 @@ export interface MemeText {
 export interface MemeTemplate {
   id: string;
   templateId: string;
-  userId: string;
   textOverlays: MemeText[];
-  createdAt: Date;
+  createdAt?: Date;
   imageUrl: string;
 }
 
@@ -80,7 +82,7 @@ export function MemeBuilder() {
     setActiveTab,
     updateActiveTextbox
   } = useMemeStore();
-  const { activeTextId } = useEditorStore();
+  const { activeTextId, canvas } = useEditorStore();
   console.log("🚀 ~ MemeBuilder ~ activeTextId:", activeTextId);
 
   const textOverlays = selectedTemplate.textOverlays;
@@ -239,6 +241,36 @@ export function MemeBuilder() {
     }
   };
 
+  const saveTemplate = () => {
+
+    // get all the text boxes
+    const textboxes = canvas?.getObjects()
+      .filter((obj) => obj.type === "i-text") as IText[];
+
+    // 
+
+    const template: Pick<MemeTemplate, 'textOverlays'> = {
+      textOverlays: textboxes?.map((textbox) => ({
+        areaId: "randomid",
+        fontSize: textbox.fontSize,
+        text: textbox.text || '',
+        font: "Impact",
+        height: textbox.height,
+        width: textbox.width,
+        color: "white",
+        x: textbox.left,
+        y: textbox.top,
+      })) || [],
+    };
+
+    console.log("🚀 ~ saveTemplate ~ textboxes:", template);
+
+    // copy template to clipboard
+    navigator.clipboard.writeText(JSON.stringify(template.textOverlays, null, 4)).then(() => {
+      console.log("Template copied to clipboard");
+    });
+  };
+
   return (
     <div className="grid gap-2">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -286,12 +318,9 @@ export function MemeBuilder() {
             <div className="relative flex items-center justify-center mt-4 md:mt-0">
               <EditorCanvas
                 template={selectedTemplate}
-              // activeTextId={activeTextId}
-              // setActiveTextId={setActiveTextId}
-              // textItems={textItems}
-              // setTextItems={setTextItems}
               />
-              {activeTextId && (
+
+              {/* {activeTextId && (
                 <div className="fixed bottom-4 left-0 right-0 mx-auto w-full max-w-md bg-black/80 backdrop-blur-sm border-2 border-cyan-400 rounded-lg p-4 z-50">
                   <div className="flex items-center gap-2">
                     <input
@@ -350,8 +379,13 @@ export function MemeBuilder() {
                     </button>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
+            <Button
+              onClick={saveTemplate}
+            >
+              Console the positions
+            </Button>
           </div>
         </TabsContent>
 
