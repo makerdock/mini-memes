@@ -2,10 +2,10 @@
 
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
-import { type Canvas } from 'fabric';
-import { install } from 'fabricjs-extension';
+import { Image as FabricImage, Text as FabricText, type Canvas } from 'fabric';
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { MemeTemplate } from './MemeBuilder';
 
 // import { useCanvasStore } from '~/store/useCanvasStore';
 // import { useEditorStore } from '~/store/useEditorStore';
@@ -13,31 +13,104 @@ import { useEffect, useState } from 'react';
 
 interface EditorCanvasProps {
   className?: string;
+  template?: MemeTemplate;
 }
 
-const EditorCanvas: React.FC<EditorCanvasProps> = ({ className }) => {
+const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
   const { editor, onReady } = useFabricJSEditor();
+  console.log("🚀 ~ editor:", editor);
   const { setCanvas } = useEditorStore();
   // const { selectedSize } = useCanvasStore();
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  // const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  const setBackground = async (canvas: Canvas, imageUrl: string) => {
+    // fetch the image from the template
+    const image = await fetch(imageUrl || '');
+    const imageBlob = await image.blob();
+    const imageObjectURL = URL.createObjectURL(imageBlob);
+
+    // create a new Fabric.js image instance from the blob
+    const fabricImage = new Image();
+    fabricImage.src = imageObjectURL;
+    // wait for the image to load
+    await new Promise((resolve) => {
+      fabricImage.onload = resolve;
+    });
+    // create a new Fabric.js image instance from the blob
+    const img = new FabricImage(fabricImage);
+    img.set({
+      selectable: false,
+      evented: false,
+      hasControls: false,
+      hasBorders: false,
+      lockMovementX: true,
+      lockMovementY: true,
+      lockRotation: true,
+      lockScalingX: true,
+      lockScalingY: true,
+      lockUniScaling: true,
+      objectCaching: false,
+      skipOffscreen: true,
+    });
+
+    // get the dimensions of the image
+    const imgWidth = img.width || 0;
+    const imgHeight = img.height || 0;
+
+    // get the width of canvas container element
+    const canvasDom = document.querySelector('.canvas-container');
+    const parentElement = canvasDom!.parentElement;
+    const containerWidth = parentElement ? parentElement.clientWidth : 0;
+
+    // Calculate height while maintaining aspect ratio
+    const bgImageAspectRatio = imgWidth / imgHeight;
+    const canvasHeight = containerWidth / bgImageAspectRatio;
+
+    // Set canvas dimensions
+    canvas.setWidth(containerWidth);
+    canvas.setHeight(canvasHeight);
+
+    // add the image to the canvas
+    canvas.add(img);
+
+    // scale image to fit canvas
+    img.scaleToWidth(containerWidth);
+    img.scaleToHeight(canvasHeight);
+
+    // center the image on the canvas
+    img.set({ left: 0, top: 0 });
+  };
 
   const handleCanvasReady = async (canvas: Canvas) => {
     try {
-      // Apply the extension with custom configuration
-      install(canvas, {
-        actionsToInstall: {
-          zoomWithPinch: true,
-        },
+      await setBackground(canvas, template?.imageUrl || '');
+
+      // add the text boxes to the canvas
+      template?.textOverlays.forEach((textBox) => {
+        canvas.add(new FabricText(textBox.text, {
+          left: textBox.x,
+          top: textBox.y,
+          fontSize: textBox.size,
+          fontFamily: 'Impact',
+          fill: 'white',
+          stroke: 'black',
+          strokeWidth: 2,
+          strokeLineCap: 'round',
+          strokeLineJoin: 'round',
+          // preserve aspect ratio
+          scaleX: 1,
+          scaleY: 1,
+          lockUniScaling: true,
+          // disable resizing
+          lockScalingX: true,
+          lockScalingY: true,
+          // remove control points when selected
+          hasControls: false,
+          // remove the dots to scale
+          originX: 'left',
+          originY: 'top',
+        }));
       });
-
-      // const cachedCanvasDataFromLs = localStorage.getItem('remoteCanvasData');
-
-      // if (cachedCanvasDataFromLs) {
-      //   await canvasOperations.restoreCanvasState(
-      //     canvas,
-      //     canvasOperations.parseCanvasData(cachedCanvasDataFromLs),
-      //   );
-      // }
 
       onReady(canvas);
     } catch (error) {
@@ -51,14 +124,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className }) => {
     }
   }, [editor, setCanvas]);
 
-  if (isRefreshing) {
-    return <div className='aspect-square h-full w-full'></div>;
-  }
-
   return (
     <FabricJSCanvas
       className={classNames(
-        'editor-canvas aspect-square h-full w-full overflow-hidden',
+        'editor-canvas h-full w-full overflow-hidden',
         className,
       )}
       onReady={handleCanvasReady}

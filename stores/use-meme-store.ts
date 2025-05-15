@@ -1,6 +1,6 @@
+import { MemeTemplate, MemeText } from '@/components/MemeBuilder';
+import { MEME_TEMPLATES } from '@/lib/meme-templates';
 import { create } from 'zustand';
-import type { MemeTemplate, MemeText } from '../../components/meme-generator';
-import { MEME_TEMPLATES } from '../meme-templates';
 
 interface MemeStore {
     selectedTemplate: MemeTemplate;
@@ -30,7 +30,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         // Check if textbox exists first
         const currTemplate = get().selectedTemplate;
         const existingTextbox = currTemplate.textOverlays.find(item => item.areaId === id);
-        
+
         if (!existingTextbox) {
             // This is a new textbox - add it instead of updating
             const fullTextbox = {
@@ -42,16 +42,16 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
                 x: updates.x || 250,
                 y: updates.y || 250
             };
-            
+
             const updatedTemplate = {
                 ...currTemplate,
                 textOverlays: [...currTemplate.textOverlays, fullTextbox]
             };
-            
+
             set({ selectedTemplate: updatedTemplate });
             return;
         }
-        
+
         // Update existing textbox
         const updatedTemplate = {
             ...currTemplate,
@@ -74,7 +74,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
             ...currTemplate,
             textOverlays: [...currTemplate.textOverlays, textOverlay]
         };
-        
+
         set({ selectedTemplate: updatedTemplate });
     },
     removeTextOverlay: (id) => {
@@ -83,7 +83,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
             ...currTemplate,
             textOverlays: currTemplate.textOverlays.filter((item) => item.areaId !== id)
         };
-        
+
         set({ selectedTemplate: updatedTemplate });
     }
 }));

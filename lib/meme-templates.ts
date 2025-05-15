@@ -1,4 +1,4 @@
-import { MemeTemplate } from '@/components/meme-generator';
+import { MemeTemplate } from '@/components/MemeBuilder';
 
 export const MEME_TEMPLATES: MemeTemplate[] = [
   {

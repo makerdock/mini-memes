@@ -2,13 +2,14 @@
 
 import { sdk } from "@farcaster/frame-sdk";
 import { MoveLeft, Share } from "lucide-react";
-import { MemeEditor } from "../components/meme-editor";
-import { MemeTemplateSelector } from "../components/meme-template-selector";
-import { MintMeme } from "../components/mint-meme";
-import { Button } from "../components/ui/button";
-import { Tabs, TabsContent } from "../components/ui/tabs";
-import { MEME_TEMPLATES } from "../lib/meme-templates";
-import { useMemeStore } from '../lib/stores/use-meme-store';
+
+import { MemeTemplateSelector } from "./meme-template-selector";
+import { MintMeme } from "./mint-meme";
+import { Button } from "./ui/button";
+import { Tabs, TabsContent } from "./ui/tabs";
+import { useMemeStore } from '@/stores/use-meme-store';
+import { MEME_TEMPLATES } from '@/lib/meme-templates';
+import EditorCanvas from './EditorCanvas';
 
 // Helper function to safely get placeholder text
 // function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -69,7 +70,7 @@ export interface MemeTemplate {
   imageUrl: string;
 }
 
-export function MemeGenerator() {
+export function MemeBuilder() {
   const {
     selectedTemplate,
     generatedMeme,
@@ -297,7 +298,7 @@ export function MemeGenerator() {
           <div className="grid gap-6 md:grid-cols-2">
 
             <div className="relative flex items-center justify-center mt-4 md:mt-0">
-              <MemeEditor />
+              <EditorCanvas template={selectedTemplate} />
             </div>
           </div>
         </TabsContent>
