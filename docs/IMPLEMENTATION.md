@@ -91,7 +91,7 @@ A mini app that allows Farcaster users to create, share, and mint memes directly
   "id": "string",
   "templateId": "string",
   "userId": "string",
-  "textOverlays": [
+  "textBoxes": [
     {
       "areaId": "string",
       "text": "string",

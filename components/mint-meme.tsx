@@ -18,7 +18,7 @@ export function MintMeme() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [txHash] = useState("");
 
-  const title = selectedTemplate.textOverlays[0].text;
+  const title = selectedTemplate.textBoxes[0].text;
 
   const handleMint = async () => {
     if (minting) return;

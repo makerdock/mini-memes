@@ -12,6 +12,7 @@ import { MintMeme } from "./mint-meme";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent } from "./ui/tabs";
 import { IText } from 'fabric';
+import { supabase } from '@/lib/supabase';
 
 // Helper function to safely get placeholder text
 // function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -54,21 +55,25 @@ import { IText } from 'fabric';
 //       return defaultPlaceholders[position];
 //   }
 // }
-export interface MemeText {
-  areaId: string;
-  text: string;
-  font: string;
-  height: number;
-  width: number;
-  fontSize: number;
-  color: string;
-  x: number;
-  y: number;
-}
+// export interface MemeText {
+//   areaId: string;
+//   text: string;
+//   font: string;
+//   height: number;
+//   width: number;
+//   fontSize: number;
+//   color: string;
+//   x: number;
+//   y: number;
+//   scaleX?: number;
+//   scaleY?: number;
+// }
+
+export type MemeText = IText;
 export interface MemeTemplate {
   id: string;
   templateId: string;
-  textOverlays: MemeText[];
+  data: any; // Canvas JSON data type
   createdAt?: Date;
   imageUrl: string;
 }
@@ -85,7 +90,7 @@ export function MemeBuilder() {
   const { activeTextId, canvas } = useEditorStore();
   console.log("🚀 ~ MemeBuilder ~ activeTextId:", activeTextId);
 
-  const textOverlays = selectedTemplate.textOverlays;
+  const textBoxes = selectedTemplate.textBoxes;
 
   const handleTemplateSelect = (template: (typeof MEME_TEMPLATES)[0]) => {
     setSelectedTemplate(template);
@@ -241,34 +246,17 @@ export function MemeBuilder() {
     }
   };
 
-  const saveTemplate = () => {
-
+  const saveTemplate = async () => {
     // get all the text boxes
-    const textboxes = canvas?.getObjects()
-      .filter((obj) => obj.type === "i-text") as IText[];
+    const data = canvas?.toJSON();
 
-    // 
-
-    const template: Pick<MemeTemplate, 'textOverlays'> = {
-      textOverlays: textboxes?.map((textbox) => ({
-        areaId: "randomid",
-        fontSize: textbox.fontSize,
-        text: textbox.text || '',
-        font: "Impact",
-        height: textbox.height,
-        width: textbox.width,
-        color: "white",
-        x: textbox.left,
-        y: textbox.top,
-      })) || [],
-    };
-
-    console.log("🚀 ~ saveTemplate ~ textboxes:", template);
-
-    // copy template to clipboard
-    navigator.clipboard.writeText(JSON.stringify(template.textOverlays, null, 4)).then(() => {
-      console.log("Template copied to clipboard");
-    });
+    // save this to supabase with the active template id
+    const { data: memeTemplate, error } = await supabase.from('meme_templates')
+      .insert({
+        id: selectedTemplate.id,
+        data: data,
+      });
+    console.log("🚀 ~ saveTemplate ~ memeTemplate:", memeTemplate);
   };
 
   return (
@@ -325,10 +313,10 @@ export function MemeBuilder() {
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={textOverlays.find(item => item.areaId === activeTextId)?.text || ''}
+                      value={textBoxes.find(item => item.areaId === activeTextId)?.text || ''}
                       onChange={(e) => {
                         const newText = e.target.value.toUpperCase();
-                        const activeItem = textOverlays.find(item => item.areaId === activeTextId);
+                        const activeItem = textBoxes.find(item => item.areaId === activeTextId);
                         if (activeItem) {
                           const textLength = newText.length;
                           const baseSize = 24;
@@ -339,7 +327,7 @@ export function MemeBuilder() {
                             size: adjustedSize
                           });
 
-                          // updateActiveTextbox(textOverlays.map(item =>
+                          // updateActiveTextbox(textBoxes.map(item =>
                           //   item.areaId === activeTextId ? {
                           //     ...item,
                           //     text: newText,
@@ -353,7 +341,7 @@ export function MemeBuilder() {
                     />
                     <button
                       onClick={() => {
-                        const activeItem = textOverlays.find(item => item.areaId === activeTextId);
+                        const activeItem = textBoxes.find(item => item.areaId === activeTextId);
                         if (activeItem) {
                           updateActiveTextbox(activeTextId, {
                             size: Math.min(40, activeItem.size + 2)
@@ -366,7 +354,7 @@ export function MemeBuilder() {
                     </button>
                     <button
                       onClick={() => {
-                        const activeItem = textOverlays.find(item => item.areaId === activeTextId);
+                        const activeItem = textBoxes.find(item => item.areaId === activeTextId);
                         if (activeItem) {
                           updateActiveTextbox(activeTextId, {
                             size: Math.max(12, activeItem.size - 2)

@@ -84,50 +84,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     try {
       await setBackground(canvas, template?.imageUrl || '');
 
-      // add the text boxes to the canvas
-      template?.textOverlays.forEach((textBox) => {
-        const textBoxInstance = new IText(textBox.text, {
-          left: textBox.x,
-          top: textBox.y,
-          height: textBox.height,
-          width: textBox.width,
-          fontFamily: 'Impact',
-          fill: 'white',
-          stroke: 'black',
-          strokeWidth: 2,
-          strokeLineCap: 'round',
-          strokeLineJoin: 'round',
-          fontSize: textBox.fontSize ?? 32,
-          // preserve aspect ratio
-          scaleX: 1,
-          scaleY: 1,
-          // Lock uniform scaling to maintain aspect ratio
-          lockUniScaling: false,
-          // Force proportional scaling
-          lockScalingFlip: true,
-          // keep origin points
-          originX: 'left',
-          originY: 'top',
-
-          // Add border and corner styling
-          borderColor: 'black',
-          cornerColor: 'black',
-          cornerStyle: 'circle',
-          cornerSize: 12,
-          transparentCorners: false,
-
-          data: {
-            areaId: textBox.areaId,
-          }
-        });
-        if (textBox.height) {
-          textBoxInstance.height = textBox.height;
-          textBoxInstance.width = textBox.width;
-        }
-
-        canvas.add(textBoxInstance);
-      });
-
       onReady(canvas);
     } catch (error) {
       console.error('Failed to restore canvas state:', error);

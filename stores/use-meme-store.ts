@@ -29,7 +29,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
     updateActiveTextbox: (id, updates) => {
         // Check if textbox exists first
         const currTemplate = get().selectedTemplate;
-        const existingTextbox = currTemplate.textOverlays.find(item => item.areaId === id);
+        const existingTextbox = currTemplate.textBoxes.find(item => item.areaId === id);
 
         if (!existingTextbox) {
             // This is a new textbox - add it instead of updating
@@ -47,7 +47,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
 
             const updatedTemplate = {
                 ...currTemplate,
-                textOverlays: [...currTemplate.textOverlays, fullTextbox]
+                textBoxes: [...currTemplate.textBoxes, fullTextbox]
             };
 
             set({ selectedTemplate: updatedTemplate });
@@ -57,7 +57,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         // Update existing textbox
         const updatedTemplate = {
             ...currTemplate,
-            textOverlays: currTemplate.textOverlays.map((item) => {
+            textBoxes: currTemplate.textBoxes.map((item) => {
                 if (item.areaId === id) {
                     return {
                         ...item,
@@ -74,7 +74,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         const currTemplate = get().selectedTemplate;
         const updatedTemplate = {
             ...currTemplate,
-            textOverlays: [...currTemplate.textOverlays, textOverlay]
+            textBoxes: [...currTemplate.textBoxes, textOverlay]
         };
 
         set({ selectedTemplate: updatedTemplate });
@@ -83,7 +83,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         const currTemplate = get().selectedTemplate;
         const updatedTemplate = {
             ...currTemplate,
-            textOverlays: currTemplate.textOverlays.filter((item) => item.areaId !== id)
+            textBoxes: currTemplate.textBoxes.filter((item) => item.areaId !== id)
         };
 
         set({ selectedTemplate: updatedTemplate });

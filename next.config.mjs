@@ -7,7 +7,13 @@ const nextConfig = {
     return config;
   },
   images: {
-    // remotePatterns: [new URL('https://assets.example.com/account123/**')],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'minimemes.vercel.app',
+        pathname: '/meme-bg/**'
+      }
+    ]
   }
 };
 
