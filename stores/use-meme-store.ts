@@ -33,14 +33,16 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
 
         if (!existingTextbox) {
             // This is a new textbox - add it instead of updating
-            const fullTextbox = {
+            const fullTextbox: MemeText = {
                 areaId: id,
                 text: updates.text || 'New text',
                 font: updates.font || 'Impact',
-                size: updates.size || 32,
+                fontSize: updates.fontSize || 32,
                 color: updates.color || '#ffffff',
                 x: updates.x || 250,
-                y: updates.y || 250
+                y: updates.y || 250,
+                height: updates.height || 300,
+                width: updates.width || 100
             };
 
             const updatedTemplate = {

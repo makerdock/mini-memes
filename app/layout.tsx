@@ -5,7 +5,7 @@ import '../styles/globals.css';
 import { Providers } from './providers';
 import { Comic_Neue } from "next/font/google";
 import { ThemeProvider } from '../components/theme-provider';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 import FrameAutomationProviders from '../components/frame-automation-providers';
 
 const comic = Comic_Neue({ subsets: ["latin"], weight: "400" });

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "../components/ui/button";
 import { PenLine } from "lucide-react";
-import { cn } from "../lib/utils";
+import { cn } from "@/lib/utils";
 import type { MEME_TEMPLATES } from "../lib/meme-templates";
 
 interface MemeTemplateSelectorProps {
