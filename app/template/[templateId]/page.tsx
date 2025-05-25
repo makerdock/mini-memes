@@ -2,12 +2,8 @@ import { MemeBuilder } from '@/components/MemeBuilder';
 import { getMemeTemplateById } from '@/lib/meme-templates';
 import { notFound } from 'next/navigation';
 
-interface TemplatePageProps {
-    params: { templateId: string; };
-}
-
-export default function TemplatePage({ params }: TemplatePageProps) {
-    const template = getMemeTemplateById(params.templateId);
+export default async function TemplatePage({ params }: { params: { templateId: string; }; }) {
+    const template = await getMemeTemplateById(params.templateId);
     if (!template) {
         notFound();
     }

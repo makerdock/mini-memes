@@ -5,14 +5,14 @@ import Image from "next/image";
 import { Button } from "../components/ui/button";
 import { PenLine } from "lucide-react";
 import { cn } from "../lib/utils";
-import type { MEME_TEMPLATES } from "../lib/meme-templates";
+import type { MemeTemplate } from "../lib/meme-templates";
 
 // NOTE: This component is now only used for in-place template selection. Navigation to /template/:templateId is handled on the home page.
 
 interface MemeTemplateSelectorProps {
-  templates: typeof MEME_TEMPLATES;
-  selectedTemplate: (typeof MEME_TEMPLATES)[0];
-  onSelect: (template: (typeof MEME_TEMPLATES)[0]) => void;
+  templates: MemeTemplate[];
+  selectedTemplate: MemeTemplate;
+  onSelect: (template: MemeTemplate) => void;
   onNextClick?: () => void;
 }
 
@@ -35,7 +35,7 @@ export function MemeTemplateSelector({
   }, [selectedTemplate]);
 
   // Safely compare template IDs (handling both string and number types)
-  const isSelected = (template: (typeof MEME_TEMPLATES)[0]) => {
+  const isSelected = (template: MemeTemplate) => {
     if (!selectedTemplate) return false;
     return String(template.id) === String(selectedTemplate.id);
   };
