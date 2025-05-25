@@ -8,10 +8,6 @@ export default async function TemplatePage({ params }: { params: { templateId: s
         notFound();
     }
     return (
-        <main className="min-h-screen bg-gradient-to-b from-purple-600 via-blue-500 to-pink-500 text-white">
-            <div className="container mx-auto px-4 py-8">
-                <MemeBuilder template={template} />
-            </div>
-        </main>
+        <MemeBuilder template={template} />
     );
 } 
