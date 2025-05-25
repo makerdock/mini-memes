@@ -8,7 +8,7 @@ export function getDefaultTextBoxProps() {
         strokeLineJoin: 'round',
         hasControls: true,
         hasBorders: true,
-        padding: 8,
+        padding: 4,
         originX: 'left' as const,
         originY: 'top' as const,
         selectable: true,
@@ -17,5 +17,6 @@ export function getDefaultTextBoxProps() {
         cornerColor: 'black',
         cornerStyle: 'circle',
         transparentCorners: false,
+        textAlign: 'center',
     } as const;
 } 
