@@ -20,8 +20,8 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   } = useMemeStore();
   const { canvas } = useEditorStore();
   const [saving, setSaving] = useState(false);
-  const [scaleStep, setScaleStep] = useState(0.1);
-  const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
+  // const [scaleStep, setScaleStep] = useState(0.1);
+  // const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
   const [activeObject, setActiveObject] = useState<any>(null);
 
   // Listen for active object changes on the canvas
@@ -210,14 +210,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     if (!canvas) return;
     const active = canvas.getActiveObject();
     if (active && (active.type === 'text' || active.type === 'i-text')) {
-      let step = scaleStep;
-      if (lastScaleDirection === direction) {
-        step += 0.1;
-      } else {
-        step = 0.1;
-      }
-      setScaleStep(step);
-      setLastScaleDirection(direction);
+      const step = delta;
       const currentScale = active.scaleX || 1;
       const newScale = Math.max(0.1, currentScale + (direction === 'inc' ? step : -step));
       active.set({ scaleX: newScale, scaleY: newScale });
@@ -226,19 +219,6 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       canvas.requestRenderAll();
     }
   };
-
-  // Font size handlers
-  const handleFontSizeChange = useCallback((delta: number) => {
-    if (!canvas) return;
-    const active = canvas.getActiveObject();
-    if (active && (active.type === 'text' || active.type === 'i-text')) {
-      const currentFontSize = active.fontSize || 24;
-      const newFontSize = Math.max(6, currentFontSize + delta);
-      active.set({ fontSize: newFontSize });
-      canvas.requestRenderAll();
-      setActiveObject({ ...active }); // force re-render
-    }
-  }, [canvas]);
 
   // Save all text objects to Supabase
   const handleSave = async () => {
@@ -273,8 +253,8 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
         {/* Font size controls - only show if active object is text */}
         {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
           <div className="flex items-center gap-1">
-            <Button onClick={() => handleScaleChange(0.1, 'inc')} variant="outline" title="Increase Scale">+</Button>
-            <Button onClick={() => handleScaleChange(0.1, 'dec')} variant="outline" title="Decrease Scale">-</Button>
+            <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" title="Increase Scale">+</Button>
+            <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" title="Decrease Scale">-</Button>
           </div>
         )}
       </div>
