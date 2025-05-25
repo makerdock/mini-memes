@@ -172,8 +172,6 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   }
 
   return (
-    <div className="grid gap-2">
-      <EditorCanvas template={template} />
-    </div >
+    <EditorCanvas template={template} />
   );
 }

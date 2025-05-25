@@ -1,8 +1,8 @@
-import Link from "next/link"
+import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="mt-12 text-center">
+    <footer className="mb-4 text-center">
       <div className="p-4 bg-black/30 backdrop-blur-sm border-2 border-cyan-400 rounded-lg">
         <p className="text-sm font-comic">
           <span className="text-yellow-300">Mini-Memes</span> © {new Date().getFullYear()} |
@@ -23,5 +23,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

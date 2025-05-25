@@ -31,7 +31,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-purple-600 via-blue-500 to-pink-500 text-white">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <Header />
         <h2 className="text-2xl font-bold mb-6 text-center">Choose a Meme Template</h2>
         {loading && <div className="text-center text-lg">Loading templates...</div>}
