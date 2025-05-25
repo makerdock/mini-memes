@@ -3,81 +3,19 @@
 import { sdk } from "@farcaster/frame-sdk";
 import { Share } from "lucide-react";
 
+import type { MemeTemplate } from '@/lib/meme-templates';
+import { useMemeStore } from '@/stores/use-meme-store';
+import EditorCanvas from './EditorCanvas';
 import { MintMeme } from "./mint-meme";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent } from "./ui/tabs";
-import { useMemeStore } from '@/stores/use-meme-store';
-import EditorCanvas from './EditorCanvas';
-import type { MemeTemplate, MemeText } from '@/lib/meme-templates';
 
-// Helper function to safely get placeholder text
-// function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
-//   // Convert templateId to number if it's a string
-//   const id = typeof templateId === "string" ? Number.parseInt(templateId, 10) : templateId;
-
-//   // Default placeholders if ID is invalid or not found
-//   const defaultPlaceholders = {
-//     top: "TOP TEXT HERE",
-//     bottom: "BOTTOM TEXT HERE",
-//   };
-
-//   // Return default if ID is NaN
-//   if (isNaN(id)) {
-//     return defaultPlaceholders[position];
-//   }
-
-//   switch (id) {
-//     case 1: // Distracted Boyfriend
-//       return position === "top" ? "MY CURRENT PROJECT" : "NEW SHINY TECHNOLOGY";
-//     case 2: // Drake
-//       return position === "top" ? "USING REGULAR MEME SITES" : "USING MINI-MEMES ON FARCASTER";
-//     case 3: // Woman Yelling at Cat
-//       return position === "top" ? "ME EXPLAINING WHY I NEED ANOTHER NFT" : "MY WALLET BALANCE";
-//     case 4: // Fancy Winnie
-//       return position === "top" ? "REGULAR MEMES" : "MEMES MINTED AS NFTS";
-//     case 5: // Disaster Girl
-//       return position === "top" ? "WATCHING MY FRIENDS" : "STRUGGLE WITH WEB3";
-//     case 6: // Anakin & Padme
-//       return position === "top" ? "I'M GOING TO MINT JUST ONE NFT" : "RIGHT?";
-//     case 7: // Button Choice
-//       return position === "top" ? "SAVE MONEY" : "BUY MORE NFTS";
-//     case 8: // Always Has Been
-//       return position === "top" ? "WAIT, IT'S ALL JUST JPEGS?" : "ALWAYS HAS BEEN";
-//     case 9: // Is This a Butterfly
-//       return position === "top" ? "IS THIS FINANCIAL FREEDOM?" : "ME LOOKING AT MY NFT COLLECTION";
-//     case 10: // Left Exit
-//       return position === "top" ? "RESPONSIBLE INVESTING" : "APING INTO MEMECOINS";
-//     default:
-//       return defaultPlaceholders[position];
-//   }
-// }
-
-// NOTE: MemeBuilder now expects a template prop and does not handle template selection. Use in /template/[templateId]/page.tsx.
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
     generatedMeme,
     activeTab,
     setActiveTab
   } = useMemeStore();
-
-  // Remove these lines
-  // const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate>(MEME_TEMPLATES[0]);
-  // const [customTextItems, setCustomTextItems] = useState<CustomTextItem[]>([]);
-  // const [selectedCustomTextId, setSelectedCustomTextId] = useState<string | null>(null);
-  // const [generatedMeme, setGeneratedMeme] = useState<string | null>(null);
-  // const [activeTab, setActiveTab] = useState("create");
-  // const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
-  // const isMobile = useMediaQuery("(max-width: 640px)");
-
-  // Update canvas dimensions when the editor is mounted
-  // useEffect(() => {
-  //   if (editorRef.current) {
-  //     const canvas = editorRef.current.querySelector("canvas");
-  //     if (canvas) {
-  //       setCanvasDimensions({ width: canvas.width, height: canvas.height });
-  //     }
-  //   }
-  // }, [selectedTemplate]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -235,77 +173,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
 
   return (
     <div className="grid gap-2">
-      <Tabs value={activeTab || 'edit'} onValueChange={handleTabChange} className="w-full">
-        {/* <TabsList className="grid w-full grid-cols-3 bg-black/30 border-2 border-cyan-400 sticky top-2 z-20 backdrop-blur-sm">
-          <TabsTrigger
-            value="create"
-            className="font-comic text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 px-1 sm:px-4"
-          >
-            Choose Template
-          </TabsTrigger>
-          <TabsTrigger
-            value="edit"
-            className="font-comic text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 px-1 sm:px-4"
-          >
-            Add Text
-          </TabsTrigger>
-          <TabsTrigger
-            value="share"
-            className="font-comic text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 px-1 sm:px-4"
-          >
-            Mint & Share
-          </TabsTrigger>
-        </TabsList> */}
-
-        <TabsContent value="edit" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
-          <div className='mb-4'>
-            <h3 className='text-xl font-comic text-yellow-300 mb-2 text-center'>Add Text</h3>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="relative flex items-center justify-center mt-4 md:mt-0">
-              <EditorCanvas template={template} />
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="share" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
-          <div className='mb-4'>
-            <h3 className='text-xl font-comic text-yellow-300 mb-2 text-center'>Your Meme is Ready!</h3>
-          </div>
-
-          {generatedMeme ? (
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="flex flex-col items-center justify-center">
-                <div className="relative w-full max-w-md mb-4">
-                  <img
-                    src={generatedMeme || "/placeholder.svg"}
-                    alt="Generated meme"
-                    className="w-full h-auto rounded-md shadow-neon"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <Button
-                    onClick={handleShare}
-                    className="bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 font-comic border-2 border-white w-full">
-                    <Share className="mr-1 sm:mr-2 h-4 w-4" />
-                    <span className="text-xs sm:text-sm">Share</span>
-                  </Button>
-                </div>
-
-                <MintMeme />
-              </div>
-            </div>
-          ) : (
-            <div className="text-center p-8">
-              <p className="text-xl font-comic">Generate your meme first!</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
+      <EditorCanvas template={template} />
+    </div >
   );
 }

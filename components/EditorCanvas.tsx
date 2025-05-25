@@ -3,7 +3,7 @@
 import { MemeTemplate } from '@/lib/meme-templates';
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
-import { FabricText, type Canvas } from 'fabric';
+import { FabricText, FabricImage, type Canvas } from 'fabric';
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
 import { useEffect } from 'react';
 
@@ -18,7 +18,6 @@ interface EditorCanvasProps {
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
   const { editor, onReady } = useFabricJSEditor();
-  console.log("🚀 ~ editor:", editor);
   const { setCanvas } = useEditorStore();
   // const { selectedSize } = useCanvasStore();
   // const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -39,8 +38,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     // create a new Fabric.js image instance from the blob
     // 
     // @ts-ignore 
-    const img = new FabricImage(fabricImage);
-    img.set({
+    const img = new FabricImage(fabricImage, {
       selectable: false,
       evented: false,
       hasControls: false,
