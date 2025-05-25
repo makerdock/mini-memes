@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Trash } from 'lucide-react';
 
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
@@ -238,29 +239,45 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     }
   };
 
+  // Delete the selected object from the canvas
+  const handleDelete = () => {
+    if (!canvas || !activeObject) return;
+    canvas.remove(activeObject);
+    setActiveObject(null);
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+  };
+
   if (!template) {
     return <div className="text-center p-8 text-xl font-comic text-red-400">Template not found.</div>;
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
-      {/* Toolbar */}
-      <div className="flex gap-2 mb-2">
-        <Button onClick={handleAddText} variant="secondary">Add Text</Button>
-        <Button onClick={handleSave} disabled={saving} variant="default">
-          {saving ? 'Saving...' : 'Save Template'}
-        </Button>
-        {/* Scale controls */}
-
-        {/* Font size controls - only show if active object is text */}
-        {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
-          <div className="flex items-center gap-1">
-            <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" title="Increase Scale">+</Button>
-            <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" title="Decrease Scale">-</Button>
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col h-full w-full relative">
       <EditorCanvas template={template} />
+      {/* Sticky Toolbar at the bottom */}
+      <div className="sticky bottom-4 left-0 w-full z-50 pointer-events-none mt-4">
+        <div className="flex gap-2 bg-black/60 rounded-lg shadow-lg px-4 py-2 pointer-events-auto border border-white/20 backdrop-blur-md">
+          <Button onClick={handleAddText} variant="secondary">Add Text</Button>
+          <Button onClick={handleSave} disabled={saving} variant="default">
+            {saving ? 'Saving...' : 'Save Template'}
+          </Button>
+          <div className="flex-1"></div>
+          {/* Font size controls - only show if active object is text */}
+          {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
+            <div className="flex items-center gap-1">
+              <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" title="Increase Scale">+</Button>
+              <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" title="Decrease Scale">-</Button>
+            </div>
+          )}
+          {/* Delete button - only show if an object is selected */}
+          {activeObject && (
+            <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
+              <Trash className="w-5 h-5" />
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
