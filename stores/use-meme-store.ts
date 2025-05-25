@@ -26,41 +26,9 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
     setGeneratedMeme: (meme) => set({ generatedMeme: meme }),
     setActiveTab: (tab) => set({ activeTab: tab }),
     updateActiveTextbox: (id, updates) => {
-        // Check if textbox exists first
-        const currTemplate = get().selectedTemplate;
-        const existingTextbox = currTemplate?.text_boxes.find((item: MemeText) => item.text === id);
-
-        if (!existingTextbox) {
-            // This is a new textbox - add it instead of updating
-            const fullTextbox: Partial<MemeText> = {
-                text: id,
-            };
-            if (currTemplate) {
-                const updatedTemplate: MemeTemplate = {
-                    ...currTemplate,
-                    text_boxes: [...currTemplate.text_boxes, fullTextbox as MemeText]
-                };
-                set({ selectedTemplate: updatedTemplate });
-            }
-            return;
-        }
-
-        // Update existing textbox
-        if (currTemplate) {
-            const updatedTemplate: MemeTemplate = {
-                ...currTemplate,
-                text_boxes: currTemplate.text_boxes.map((item: MemeText) => {
-                    if (item.text === id) {
-                        return {
-                            ...item,
-                            ...updates
-                        };
-                    }
-                    return item;
-                })
-            };
-            set({ selectedTemplate: updatedTemplate });
-        }
+        // Updates to text boxes should be handled via Fabric.js methods in the editor component.
+        // This store should not attempt to update properties on Fabric.js IText objects directly.
+        return;
     },
     addTextOverlay: (textOverlay) => {
         const currTemplate = get().selectedTemplate;
