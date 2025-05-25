@@ -1,11 +1,11 @@
 'use client';
 
+import { MemeTemplate } from '@/lib/meme-templates';
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
-import { Image as FabricImage, Text as FabricText, type Canvas } from 'fabric';
+import { FabricText, type Canvas } from 'fabric';
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
 import { useEffect } from 'react';
-import { MemeTemplate } from './MemeBuilder';
 
 // import { useCanvasStore } from '~/store/useCanvasStore';
 // import { useEditorStore } from '~/store/useEditorStore';
@@ -85,23 +85,20 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
 
   const handleCanvasReady = async (canvas: Canvas) => {
     try {
-      await setBackground(canvas, template?.imageUrl || '');
+      await setBackground(canvas, template?.image_url || '');
 
       // add the text boxes to the canvas
-      template?.textOverlays.forEach((textBox) => {
-        canvas.add(new FabricText(textBox.text, {
-          left: textBox.x,
-          top: textBox.y,
-          fontSize: textBox.size,
+      template?.text_boxes.forEach(({ text, ...textBox }) => {
+        canvas.add(new FabricText(text, {
+          ...textBox,
           fontFamily: 'Impact',
           fill: 'white',
           stroke: 'black',
           strokeWidth: 2,
           strokeLineCap: 'round',
           strokeLineJoin: 'round',
+
           // preserve aspect ratio
-          scaleX: 1,
-          scaleY: 1,
           lockUniScaling: true,
           // disable resizing
           lockScalingX: true,

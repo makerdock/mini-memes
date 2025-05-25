@@ -1,22 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import { IText } from 'fabric';
 
-export interface MemeText {
-  areaId: string;
-  text: string;
-  font: string;
-  size: number;
-  color: string;
-  x: number;
-  y: number;
-}
+export type MemeText = IText
 
 export interface MemeTemplate {
   id: string;
-  templateId: string;
-  userId: string;
-  textOverlays: MemeText[];
-  createdAt: string; // ISO string from DB
-  imageUrl: string;
+  template_id: string;
+  created_at: string;
+  image_url: string;
+  text_boxes: MemeText[];
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -31,7 +23,7 @@ export async function getAllTemplates(): Promise<MemeTemplate[]> {
   // Parse textOverlays if needed
   return (data || []).map((row) => ({
     ...row,
-    textOverlays: typeof row.textOverlays === 'string' ? JSON.parse(row.textOverlays) : row.textOverlays,
+    text_boxes: typeof row.text_boxes === 'string' ? JSON.parse(row.text_boxes) : row.text_boxes,
   })) as MemeTemplate[];
 }
 
@@ -62,6 +54,6 @@ export async function getMemeTemplateById(id: string): Promise<MemeTemplate | nu
   if (error || !data) return null;
   return {
     ...data,
-    textOverlays: typeof data.textOverlays === 'string' ? JSON.parse(data.textOverlays) : data.textOverlays,
+    text_boxes: typeof data.text_boxes === 'string' ? JSON.parse(data.text_boxes) : data.text_boxes,
   } as MemeTemplate;
 }

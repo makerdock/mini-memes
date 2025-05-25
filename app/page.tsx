@@ -1,3 +1,5 @@
+"use client";
+
 import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import Link from "next/link";
@@ -7,14 +9,23 @@ import type { MemeTemplate } from "../lib/meme-templates";
 
 export default function Home() {
   const [templates, setTemplates] = useState<MemeTemplate[]>([]);
+  console.log("🚀 ~ Home ~ templates:", templates)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getAllTemplates()
-      .then((templates) => setTemplates(templates))
-      .catch((err) => setError(err.message || 'Failed to load templates'))
-      .finally(() => setLoading(false));
+    const fetchTemplates = async () => {
+      try {
+        const fetchedTemplates = await getAllTemplates();
+        setTemplates(fetchedTemplates);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load templates');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
   }, []);
 
   return (
@@ -32,13 +43,10 @@ export default function Home() {
               className="block bg-black/30 border-2 border-cyan-400 rounded-md p-4 hover:bg-black/50 transition"
             >
               <img
-                src={template.imageUrl}
-                alt={template.templateId}
+                src={template.image_url}
+                alt={template.template_id}
                 className="w-full h-48 object-cover rounded mb-2"
               />
-              <div className="text-center font-comic text-lg text-yellow-300">
-                {template.templateId.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
-              </div>
             </Link>
           ))}
         </div>

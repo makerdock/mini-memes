@@ -18,7 +18,7 @@ export function MintMeme() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [txHash] = useState("");
 
-  const title = selectedTemplate.textOverlays[0].text;
+  const title = selectedTemplate?.text_boxes[0].text;
 
   const handleMint = async () => {
     if (minting) return;
@@ -46,6 +46,9 @@ export function MintMeme() {
       // Create form data for upload
       const formData = new FormData();
       formData.append("file", imageBlob, "meme.png");
+      if (!title) {
+        throw new Error("Title is required");
+      }
       formData.append("title", title);
       formData.append("description", description);
 

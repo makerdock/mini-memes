@@ -28,23 +28,17 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
     updateActiveTextbox: (id, updates) => {
         // Check if textbox exists first
         const currTemplate = get().selectedTemplate;
-        const existingTextbox = currTemplate?.textOverlays.find((item: MemeText) => item.areaId === id);
+        const existingTextbox = currTemplate?.text_boxes.find((item: MemeText) => item.text === id);
 
         if (!existingTextbox) {
             // This is a new textbox - add it instead of updating
-            const fullTextbox: MemeText = {
-                areaId: id,
-                text: updates.text || 'New text',
-                font: updates.font || 'Impact',
-                size: updates.size || 32,
-                color: updates.color || '#ffffff',
-                x: updates.x || 250,
-                y: updates.y || 250
+            const fullTextbox: Partial<MemeText> = {
+                text: id,
             };
             if (currTemplate) {
                 const updatedTemplate: MemeTemplate = {
                     ...currTemplate,
-                    textOverlays: [...currTemplate.textOverlays, fullTextbox]
+                    text_boxes: [...currTemplate.text_boxes, fullTextbox as MemeText]
                 };
                 set({ selectedTemplate: updatedTemplate });
             }
@@ -55,8 +49,8 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         if (currTemplate) {
             const updatedTemplate: MemeTemplate = {
                 ...currTemplate,
-                textOverlays: currTemplate.textOverlays.map((item: MemeText) => {
-                    if (item.areaId === id) {
+                text_boxes: currTemplate.text_boxes.map((item: MemeText) => {
+                    if (item.text === id) {
                         return {
                             ...item,
                             ...updates
@@ -73,7 +67,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         if (currTemplate) {
             const updatedTemplate: MemeTemplate = {
                 ...currTemplate,
-                textOverlays: [...currTemplate.textOverlays, textOverlay]
+                text_boxes: [...currTemplate.text_boxes, textOverlay]
             };
             set({ selectedTemplate: updatedTemplate });
         }
@@ -83,7 +77,7 @@ export const useMemeStore = create<MemeStore>((set, get) => ({
         if (currTemplate) {
             const updatedTemplate: MemeTemplate = {
                 ...currTemplate,
-                textOverlays: currTemplate.textOverlays.filter((item: MemeText) => item.areaId !== id)
+                text_boxes: currTemplate.text_boxes.filter((item: MemeText) => item.text !== id)
             };
             set({ selectedTemplate: updatedTemplate });
         }

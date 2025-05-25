@@ -57,8 +57,8 @@ export function MemeTemplateSelector({
             onClick={() => onSelect(template)}
           >
             <Image
-              src={template.imageUrl || "/placeholder.svg"}
-              alt={template.templateId}
+              src={template.image_url || "/placeholder.svg"}
+              alt={template.template_id}
               fill
               className="object-cover aspect-square h-full w-full"
             />
