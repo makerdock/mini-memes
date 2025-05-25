@@ -1,15 +1,14 @@
 "use client";
 
 import { sdk } from "@farcaster/frame-sdk";
-import { MoveLeft, Share } from "lucide-react";
+import { Share } from "lucide-react";
 
-import { MemeTemplateSelector } from "./meme-template-selector";
 import { MintMeme } from "./mint-meme";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent } from "./ui/tabs";
 import { useMemeStore } from '@/stores/use-meme-store';
-import { MEME_TEMPLATES } from '@/lib/meme-templates';
 import EditorCanvas from './EditorCanvas';
+import type { MemeTemplate, MemeText } from '@/lib/meme-templates';
 
 // Helper function to safely get placeholder text
 // function getPlaceholderText(templateId: number | string, position: "top" | "bottom"): string {
@@ -52,30 +51,12 @@ import EditorCanvas from './EditorCanvas';
 //       return defaultPlaceholders[position];
 //   }
 // }
-export interface MemeText {
-  areaId: string;
-  text: string;
-  font: string;
-  size: number;
-  color: string;
-  x: number;
-  y: number;
-}
-export interface MemeTemplate {
-  id: string;
-  templateId: string;
-  userId: string;
-  textOverlays: MemeText[];
-  createdAt: Date;
-  imageUrl: string;
-}
 
-export function MemeBuilder() {
+// NOTE: MemeBuilder now expects a template prop and does not handle template selection. Use in /template/[templateId]/page.tsx.
+export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
-    selectedTemplate,
     generatedMeme,
     activeTab,
-    setSelectedTemplate,
     setActiveTab
   } = useMemeStore();
 
@@ -97,10 +78,6 @@ export function MemeBuilder() {
   //     }
   //   }
   // }, [selectedTemplate]);
-
-  const handleTemplateSelect = (template: (typeof MEME_TEMPLATES)[0]) => {
-    setSelectedTemplate(template);
-  };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -252,9 +229,13 @@ export function MemeBuilder() {
     }
   };
 
+  if (!template) {
+    return <div className="text-center p-8 text-xl font-comic text-red-400">Template not found.</div>;
+  }
+
   return (
     <div className="grid gap-2">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <Tabs value={activeTab || 'edit'} onValueChange={handleTabChange} className="w-full">
         {/* <TabsList className="grid w-full grid-cols-3 bg-black/30 border-2 border-cyan-400 sticky top-2 z-20 backdrop-blur-sm">
           <TabsTrigger
             value="create"
@@ -276,40 +257,20 @@ export function MemeBuilder() {
           </TabsTrigger>
         </TabsList> */}
 
-        <TabsContent value="create" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
-          <MemeTemplateSelector
-            templates={MEME_TEMPLATES}
-            selectedTemplate={selectedTemplate}
-            onSelect={handleTemplateSelect}
-            onNextClick={() => setActiveTab("edit")}
-          />
-        </TabsContent>
-
         <TabsContent value="edit" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
-          <div className='flex items-center space-x-2 mb-4'>
-            <div
-              onClick={() => setActiveTab("create")}
-              className='py-2 px-4 flex items-center space-x-2 bg-white/10 rounded-sm w-fit mb-2'>
-              <MoveLeft className='h-4 w-4' />
-            </div>
+          <div className='mb-4'>
             <h3 className='text-xl font-comic text-yellow-300 mb-2 text-center'>Add Text</h3>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-
             <div className="relative flex items-center justify-center mt-4 md:mt-0">
-              <EditorCanvas template={selectedTemplate} />
+              <EditorCanvas template={template} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="share" className="border-2 border-cyan-400 rounded-md p-2 sm:p-4 bg-black/30">
-          <div className='flex items-center space-x-2 mb-4'>
-            <div
-              onClick={() => setActiveTab("edit")}
-              className='py-2 px-4 flex items-center space-x-2 bg-white/10 rounded-sm w-fit mb-2'>
-              <MoveLeft className='h-4 w-4' />
-            </div>
+          <div className='mb-4'>
             <h3 className='text-xl font-comic text-yellow-300 mb-2 text-center'>Your Meme is Ready!</h3>
           </div>
 
@@ -341,12 +302,6 @@ export function MemeBuilder() {
           ) : (
             <div className="text-center p-8">
               <p className="text-xl font-comic">Generate your meme first!</p>
-              <Button
-                onClick={() => setActiveTab("edit")}
-                className="mt-4 bg-gradient-to-r from-pink-400 to-purple-600 hover:from-pink-500 hover:to-purple-700 font-comic border-2 border-white"
-              >
-                Go Back to Editor
-              </Button>
             </div>
           )}
         </TabsContent>

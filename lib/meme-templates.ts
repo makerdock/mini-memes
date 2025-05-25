@@ -1,4 +1,23 @@
-import { MemeTemplate } from '@/components/MemeBuilder';
+import type { Text } from 'fabric';
+
+export interface MemeText {
+  areaId: string;
+  text: string;
+  font: string;
+  size: number;
+  color: string;
+  x: number;
+  y: number;
+}
+
+export interface MemeTemplate {
+  id: string;
+  templateId: string;
+  userId: string;
+  textOverlays: MemeText[];
+  createdAt: Date;
+  imageUrl: string;
+}
 
 export const MEME_TEMPLATES: MemeTemplate[] = [
   {
@@ -319,4 +338,8 @@ export function filenameToTitle(filename: string): string {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+
+export function getMemeTemplateById(id: string) {
+  return MEME_TEMPLATES.find((template) => template.id === id);
 }

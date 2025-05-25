@@ -7,6 +7,8 @@ import { PenLine } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { MEME_TEMPLATES } from "../lib/meme-templates";
 
+// NOTE: This component is now only used for in-place template selection. Navigation to /template/:templateId is handled on the home page.
+
 interface MemeTemplateSelectorProps {
   templates: typeof MEME_TEMPLATES;
   selectedTemplate: (typeof MEME_TEMPLATES)[0];
