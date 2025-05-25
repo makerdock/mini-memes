@@ -8,7 +8,7 @@ import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
 import { FabricText } from 'fabric';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 
@@ -22,6 +22,25 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const [saving, setSaving] = useState(false);
   const [scaleStep, setScaleStep] = useState(0.1);
   const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
+  const [activeObject, setActiveObject] = useState<any>(null);
+
+  // Listen for active object changes on the canvas
+  useEffect(() => {
+    if (!canvas) return;
+    const handleSelection = () => {
+      setActiveObject(canvas.getActiveObject());
+    };
+    canvas.on('selection:created', handleSelection);
+    canvas.on('selection:updated', handleSelection);
+    canvas.on('selection:cleared', () => setActiveObject(null));
+    // Set initial active object
+    setActiveObject(canvas.getActiveObject());
+    return () => {
+      canvas.off('selection:created', handleSelection);
+      canvas.off('selection:updated', handleSelection);
+      canvas.off('selection:cleared');
+    };
+  }, [canvas]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -202,9 +221,24 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       const currentScale = active.scaleX || 1;
       const newScale = Math.max(0.1, currentScale + (direction === 'inc' ? step : -step));
       active.set({ scaleX: newScale, scaleY: newScale });
+      active.setCoords();
+      canvas.setActiveObject(active);
       canvas.requestRenderAll();
     }
   };
+
+  // Font size handlers
+  const handleFontSizeChange = useCallback((delta: number) => {
+    if (!canvas) return;
+    const active = canvas.getActiveObject();
+    if (active && (active.type === 'text' || active.type === 'i-text')) {
+      const currentFontSize = active.fontSize || 24;
+      const newFontSize = Math.max(6, currentFontSize + delta);
+      active.set({ fontSize: newFontSize });
+      canvas.requestRenderAll();
+      setActiveObject({ ...active }); // force re-render
+    }
+  }, [canvas]);
 
   // Save all text objects to Supabase
   const handleSave = async () => {
@@ -232,11 +266,17 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       <div className="flex gap-2 mb-2">
         <Button onClick={handleAddText} variant="secondary">Add Text</Button>
         <Button onClick={handleSave} disabled={saving} variant="default">
-          {saving ? 'Saving...' : 'Save'}
+          {saving ? 'Saving...' : 'Save Template'}
         </Button>
         {/* Scale controls */}
-        <Button onClick={() => handleScaleChange(0.1, 'inc')} variant="outline" title="Increase Scale">+🔍</Button>
-        <Button onClick={() => handleScaleChange(0.1, 'dec')} variant="outline" title="Decrease Scale">-🔍</Button>
+
+        {/* Font size controls - only show if active object is text */}
+        {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
+          <div className="flex items-center gap-1">
+            <Button onClick={() => handleScaleChange(0.1, 'inc')} variant="outline" title="Increase Scale">+</Button>
+            <Button onClick={() => handleScaleChange(0.1, 'dec')} variant="outline" title="Decrease Scale">-</Button>
+          </div>
+        )}
       </div>
       <EditorCanvas template={template} />
     </div>
