@@ -22,7 +22,6 @@ export function MemeTemplateSelector({
   onSelect,
   onNextClick,
 }: MemeTemplateSelectorProps) {
-  console.log("🚀 ~ selectedTemplate:", selectedTemplate);
   const [hasSelectedTemplate, setHasSelectedTemplate] = useState(false);
 
   // Check if a template is selected

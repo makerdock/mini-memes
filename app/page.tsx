@@ -10,7 +10,6 @@ import { Skeleton } from "../components/ui/skeleton";
 
 export default function Home() {
   const [templates, setTemplates] = useState<MemeTemplate[]>([]);
-  console.log("🚀 ~ Home ~ templates:", templates);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

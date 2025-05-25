@@ -88,7 +88,6 @@ export async function getTemplateTextBoxes(id: string): Promise<MemeText[] | []>
  * Updates the text_boxes of a meme template in Supabase
  */
 export async function updateTemplateTextBoxes(id: string, text_boxes: MemeText[]): Promise<void> {
-  console.log("🚀 ~ saving ~ text_boxes:", text_boxes);
   const { error } = await supabase
     .from('meme_templates')
     .update({ text_boxes: text_boxes })
