@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getAllTemplates } from "../lib/meme-templates";
 import { useEffect, useState } from "react";
 import type { MemeTemplate } from "../lib/meme-templates";
-import { Skeleton } from "../components/ui/skeleton";
+import { Skeleton } from "../components/ui/Skeleton";
 
 export default function Home() {
   const [templates, setTemplates] = useState<MemeTemplate[]>([]);
