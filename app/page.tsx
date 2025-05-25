@@ -34,13 +34,12 @@ export default function Home() {
       <div className="container mx-auto px-4">
         <Header />
         <h2 className="text-2xl font-bold mb-6 text-center">Choose a Meme Template</h2>
-        {loading && <div className="text-center text-lg">Loading templates...</div>}
         {error && <div className="text-center text-red-400">{error}</div>}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-8">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="block bg-black/30 border-2 border-cyan-400 rounded-md p-4">
-                <Skeleton className="w-full h-48 mb-2" />
+              <div key={i} className="block bg-black/30 border-2 border-cyan-400 rounded-md">
+                <Skeleton className="w-full h-48" />
               </div>
             ))
             : templates.map((template: MemeTemplate) => (
