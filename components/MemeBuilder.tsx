@@ -9,6 +9,10 @@ import EditorCanvas from './EditorCanvas';
 import { MintMeme } from "./mint-meme";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent } from "./ui/tabs";
+import { useEditorStore } from '@/stores/useEditorStore';
+import { FabricText } from 'fabric';
+import { updateTemplateTextBoxes } from '@/lib/meme-templates';
+import { useState } from 'react';
 
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
@@ -16,6 +20,8 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     activeTab,
     setActiveTab
   } = useMemeStore();
+  const { canvas } = useEditorStore();
+  const [saving, setSaving] = useState(false);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -167,11 +173,61 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     }
   };
 
+  // Add a new text element to the canvas
+  const handleAddText = () => {
+    if (!canvas) return;
+    const text = new FabricText('New Text', {
+      left: 50,
+      top: 50,
+      fontFamily: 'Impact',
+      fill: 'white',
+      stroke: 'black',
+      strokeWidth: 2,
+      strokeLineCap: 'round',
+      strokeLineJoin: 'round',
+      lockUniScaling: true,
+      lockScalingX: true,
+      lockScalingY: true,
+      hasControls: false,
+      hasBorders: false,
+      originX: 'left',
+      originY: 'top',
+    });
+    canvas.add(text);
+    canvas.setActiveObject(text);
+    canvas.requestRenderAll();
+  };
+
+  // Save all text objects to Supabase
+  const handleSave = async () => {
+    if (!canvas || !template) return;
+    setSaving(true);
+    try {
+      // Only save FabricText objects
+      const textObjects = canvas.getObjects().filter(obj => obj.type === 'text' || obj.type === 'i-text');
+      await updateTemplateTextBoxes(template.id, textObjects.map(obj => obj.toJSON()));
+      alert('Saved text boxes to Supabase!');
+    } catch (err) {
+      alert('Failed to save: ' + (err instanceof Error ? err.message : err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!template) {
     return <div className="text-center p-8 text-xl font-comic text-red-400">Template not found.</div>;
   }
 
   return (
-    <EditorCanvas template={template} />
+    <div className="flex flex-col h-full w-full">
+      {/* Toolbar */}
+      <div className="flex gap-2 mb-2">
+        <Button onClick={handleAddText} variant="secondary">Add Text</Button>
+        <Button onClick={handleSave} disabled={saving} variant="default">
+          {saving ? 'Saving...' : 'Save'}
+        </Button>
+      </div>
+      <EditorCanvas template={template} />
+    </div>
   );
 }

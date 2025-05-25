@@ -3,7 +3,7 @@
 import { MemeTemplate } from '@/lib/meme-templates';
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
-import { FabricText, FabricImage, type Canvas } from 'fabric';
+import { FabricImage, FabricText, type Canvas } from 'fabric';
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
 import { useEffect } from 'react';
 
@@ -86,30 +86,34 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     try {
       await setBackground(canvas, template?.image_url || '');
 
-      // add the text boxes to the canvas
-      template?.text_boxes.forEach(({ text, ...textBox }) => {
-        canvas.add(new FabricText(text, {
-          ...textBox,
-          fontFamily: 'Impact',
-          fill: 'white',
-          stroke: 'black',
-          strokeWidth: 2,
-          strokeLineCap: 'round',
-          strokeLineJoin: 'round',
+      try {
+        // add the text boxes to the canvas
+        template?.text_boxes.forEach(({ text, ...textBox }) => {
+          canvas.add(new FabricText(text, {
+            ...textBox,
+            fontFamily: 'Impact',
+            fill: 'white',
+            stroke: 'black',
+            strokeWidth: 2,
+            strokeLineCap: 'round',
+            strokeLineJoin: 'round',
 
-          // preserve aspect ratio
-          lockUniScaling: true,
-          // disable resizing
-          lockScalingX: true,
-          lockScalingY: true,
-          // hide control points
-          hasControls: false,
-          hasBorders: false,
-          // keep origin points
-          originX: 'left',
-          originY: 'top',
-        }));
-      });
+            // preserve aspect ratio
+            lockUniScaling: true,
+            // disable resizing
+            lockScalingX: true,
+            lockScalingY: true,
+            // hide control points
+            hasControls: false,
+            hasBorders: false,
+            // keep origin points
+            originX: 'left',
+            originY: 'top',
+          }));
+        });
+      } catch (error) {
+        console.error(error);
+      }
 
       onReady(canvas);
     } catch (error) {

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { IText } from 'fabric';
 
-export type MemeText = IText
+export type MemeText = IText;
 
 export interface MemeTemplate {
   id: string;
@@ -54,6 +54,44 @@ export async function getMemeTemplateById(id: string): Promise<MemeTemplate | nu
   if (error || !data) return null;
   return {
     ...data,
-    text_boxes: typeof data.text_boxes === 'string' ? JSON.parse(data.text_boxes) : data.text_boxes,
   } as MemeTemplate;
+}
+
+export async function getTemplateTextBoxes(id: string): Promise<MemeText[] | []> {
+  const { data, error } = await supabase
+    .from('meme_templates')
+    .select('text_boxes')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) return [];
+
+  let textBoxes = data.text_boxes;
+  try {
+    // Recursively parse if string
+    while (typeof textBoxes === 'string') {
+      textBoxes = JSON.parse(textBoxes);
+    }
+    // Ensure it's an array before returning
+    if (Array.isArray(textBoxes)) {
+      return textBoxes;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    console.error('Error parsing text_boxes:', e);
+    return [];
+  }
+}
+
+/**
+ * Updates the text_boxes of a meme template in Supabase
+ */
+export async function updateTemplateTextBoxes(id: string, text_boxes: MemeText[]): Promise<void> {
+  console.log("🚀 ~ saving ~ text_boxes:", text_boxes);
+  const { error } = await supabase
+    .from('meme_templates')
+    .update({ text_boxes: text_boxes })
+    .eq('id', id);
+  if (error) throw error;
 }
