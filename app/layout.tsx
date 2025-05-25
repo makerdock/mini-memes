@@ -7,6 +7,7 @@ import { Comic_Neue } from "next/font/google";
 import { ThemeProvider } from '../components/theme-provider';
 import { cn } from '../lib/utils';
 import FrameAutomationProviders from '../components/frame-automation-providers';
+import { Toaster } from '../components/ui/toaster';
 
 const comic = Comic_Neue({ subsets: ["latin"], weight: "400" });
 
@@ -54,6 +55,7 @@ export default function RootLayout({
           <Providers>
             <FrameAutomationProviders>
               {children}
+              <Toaster />
             </FrameAutomationProviders>
           </Providers>
         </ThemeProvider>

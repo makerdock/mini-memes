@@ -11,6 +11,7 @@ import { IText } from 'fabric';
 import { useState, useEffect, useCallback } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
@@ -23,6 +24,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   // const [scaleStep, setScaleStep] = useState(0.1);
   // const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
   const [activeObject, setActiveObject] = useState<any>(null);
+  const { toast } = useToast();
 
   // Listen for active object changes on the canvas
   useEffect(() => {
@@ -93,7 +95,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       shareToFarcaster(uploadedUrl);
     } catch (error) {
       console.error("Error sharing meme:", error);
-      alert("Failed to share your meme. Please try again.");
+      toast({ title: "Share failed", description: "Failed to share your meme. Please try again.", variant: "destructive" });
     }
   };
 
@@ -188,7 +190,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       });
     } catch (error) {
       console.error("Error sharing to Farcaster:", error);
-      alert("Failed to open Farcaster. Do you have the Farcaster app installed?");
+      toast({ title: "Farcaster Error", description: "Failed to open Farcaster. Do you have the Farcaster app installed?", variant: "destructive" });
     }
   };
 
@@ -228,9 +230,9 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       // Only save FabricText objects
       const textObjects = canvas.getObjects().filter(obj => obj.type === 'text' || obj.type === 'i-text');
       await updateTemplateTextBoxes(template.id, textObjects.map(obj => obj.toObject()));
-      alert('Saved text boxes to Supabase!');
+      toast({ title: "Saved!", description: "Saved text boxes to Supabase!", variant: "default" });
     } catch (err) {
-      alert('Failed to save: ' + (err instanceof Error ? err.message : err));
+      toast({ title: "Save failed", description: 'Failed to save: ' + (err instanceof Error ? err.message : err), variant: "destructive" });
     } finally {
       setSaving(false);
     }
