@@ -7,7 +7,7 @@ import type { MemeTemplate } from '@/lib/meme-templates';
 import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
-import { FabricText } from 'fabric';
+import { IText } from 'fabric';
 import { useState, useEffect, useCallback } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
@@ -195,7 +195,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   // Add a new text element to the canvas
   const handleAddText = () => {
     if (!canvas) return;
-    const text = new FabricText('New Text', {
+    const text = new IText('New Text', {
       ...getDefaultTextBoxProps(),
       left: 50,
       top: 50,

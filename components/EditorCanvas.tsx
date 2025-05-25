@@ -4,7 +4,7 @@ import { getDefaultTextBoxProps } from '@/lib/fabric-defaults';
 import { MemeTemplate } from '@/lib/meme-templates';
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
-import { FabricImage, FabricText, type Canvas } from 'fabric';
+import { FabricImage, IText, type Canvas } from 'fabric';
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
 import { useEffect } from 'react';
 
@@ -90,7 +90,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
       try {
         // add the text boxes to the canvas
         template?.text_boxes.forEach(({ text, ...textBox }) => {
-          canvas.add(new FabricText(text, {
+          canvas.add(new IText(text, {
             ...getDefaultTextBoxProps(),
             ...textBox,
           }));
