@@ -227,7 +227,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     try {
       // Only save FabricText objects
       const textObjects = canvas.getObjects().filter(obj => obj.type === 'text' || obj.type === 'i-text');
-      await updateTemplateTextBoxes(template.id, textObjects.map(obj => obj.toJSON()));
+      await updateTemplateTextBoxes(template.id, textObjects.map(obj => obj.toObject()));
       alert('Saved text boxes to Supabase!');
     } catch (err) {
       alert('Failed to save: ' + (err instanceof Error ? err.message : err));

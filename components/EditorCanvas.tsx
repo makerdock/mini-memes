@@ -90,9 +90,11 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
       try {
         // add the text boxes to the canvas
         template?.text_boxes.forEach(({ text, ...textBox }) => {
+          // Remove 'type' if present in textBox
+          const { type, ...safeTextBox } = textBox as Record<string, any>;
           canvas.add(new IText(text, {
             ...getDefaultTextBoxProps(),
-            ...textBox,
+            ...safeTextBox,
           }));
         });
       } catch (error) {

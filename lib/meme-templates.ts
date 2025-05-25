@@ -60,7 +60,7 @@ export async function getMemeTemplateById(id: string): Promise<MemeTemplate | nu
 export async function getTemplateTextBoxes(id: string): Promise<MemeText[] | []> {
   const { data, error } = await supabase
     .from('meme_templates')
-    .select('text_boxes')
+    .select('text_boxes', { head: false })
     .eq('id', id)
     .single();
 
