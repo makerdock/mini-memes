@@ -67,8 +67,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     const canvasHeight = containerWidth / bgImageAspectRatio;
 
     // Set canvas dimensions
-    canvas.setWidth(containerWidth);
-    canvas.setHeight(canvasHeight);
+    // canvas.setWidth(containerWidth);
+    // canvas.setHeight(canvasHeight);
+    canvas.setDimensions({ width: containerWidth, height: canvasHeight });
 
     // add the image to the canvas
     canvas.add(img);
