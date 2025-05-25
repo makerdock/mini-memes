@@ -2,17 +2,17 @@
 
 import { sdk } from "@farcaster/frame-sdk";
 
+import { useToast } from "@/hooks/use-toast";
 import { getDefaultTextBoxProps } from '@/lib/fabric-defaults';
 import type { MemeTemplate } from '@/lib/meme-templates';
 import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
-import { useState, useEffect, useCallback } from 'react';
+import { Share2, Trash } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Trash } from 'lucide-react';
 
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
@@ -81,22 +81,28 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   //   setCustomTextItems(customTextItems.map((item) => (item.id === id ? { ...item, text } : item)));
   // };
 
-  // Sharing functionality for social media - done by Claude
+  // Share the current canvas to Farcaster
   const handleShare = async () => {
-    if (!generatedMeme) return;
-
+    if (!canvas) {
+      toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
+      return;
+    }
     try {
-      // Step 1: Add watermark to the image
-      const watermarkedImage = await addWatermark(generatedMeme);
-
-      // Step 2: Upload to Vercel Blob
-      const uploadedUrl = await uploadMemeImage(watermarkedImage);
-
-      // Step 3: Share to Farcaster
-      shareToFarcaster(uploadedUrl);
+      // Export canvas as data URL
+      const dataUrl = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 1 });
+      // Add watermark
+      const watermarkedDataUrl = await addWatermark(dataUrl);
+      // Upload to Vercel Blob
+      const uploadedUrl = await uploadMemeImage(watermarkedDataUrl);
+      // Share to Farcaster
+      await sdk.actions.composeCast({
+        text: 'Check out my meme created with Mini-Memes!',
+        embeds: [uploadedUrl],
+      });
+      toast({ title: 'Shared!', description: 'Meme shared to Farcaster!', variant: 'default' });
     } catch (error) {
-      console.error("Error sharing meme:", error);
-      toast({ title: "Share failed", description: "Failed to share your meme. Please try again.", variant: "destructive" });
+      console.error('Error sharing meme:', error);
+      toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     }
   };
 
@@ -176,25 +182,6 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     }
   };
 
-  // Share to Farcaster
-  const shareToFarcaster = async (imageUrl: string) => {
-    try {
-
-
-      // Prepare the cast text with a description and hashtags
-      const text = `Check out my meme created with Mini-Memes!`;
-
-      // Compose a cast with the image as an embed
-      await sdk.actions.composeCast({
-        text,
-        embeds: [imageUrl],
-      });
-    } catch (error) {
-      console.error("Error sharing to Farcaster:", error);
-      toast({ title: "Farcaster Error", description: "Failed to open Farcaster. Do you have the Farcaster app installed?", variant: "destructive" });
-    }
-  };
-
   // Add a new text element to the canvas
   const handleAddText = () => {
     if (!canvas) return;
@@ -248,6 +235,29 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     canvas.requestRenderAll();
   };
 
+  // Upload image to Vercel Blob
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+      formData.append('fileName', file.name);
+      const response = await fetch('/api/upload-meme', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok && data.url) {
+        toast({ title: 'Upload Successful', description: data.url, variant: 'default' });
+      } else {
+        toast({ title: 'Upload Failed', description: data.error || 'Unknown error', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Upload Failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    }
+  };
+
   if (!template) {
     return <div className="text-center p-8 text-xl font-comic text-red-400">Template not found.</div>;
   }
@@ -259,6 +269,10 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       <div className="sticky bottom-4 left-0 w-full z-50 pointer-events-none mt-4">
         <div className="flex gap-2 bg-black/60 rounded-lg shadow-lg px-4 py-2 pointer-events-auto border border-white/20 backdrop-blur-md">
           <Button onClick={handleAddText} variant="secondary">Add Text</Button>
+          {/* Share Button */}
+          <Button onClick={handleShare} variant="secondary" title="Share to Farcaster">
+            <Share2 className="w-5 h-5" />
+          </Button>
           <Button onClick={handleSave} disabled={saving} variant="default">
             {saving ? 'Saving...' : 'Save Template'}
           </Button>
