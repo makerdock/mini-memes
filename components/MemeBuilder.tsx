@@ -1,18 +1,16 @@
 "use client";
 
 import { sdk } from "@farcaster/frame-sdk";
-import { Share } from "lucide-react";
 
+import { getDefaultTextBoxProps } from '@/lib/fabric-defaults';
 import type { MemeTemplate } from '@/lib/meme-templates';
+import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
-import EditorCanvas from './EditorCanvas';
-import { MintMeme } from "./mint-meme";
-import { Button } from "./ui/button";
-import { Tabs, TabsContent } from "./ui/tabs";
 import { useEditorStore } from '@/stores/useEditorStore';
 import { FabricText } from 'fabric';
-import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useState } from 'react';
+import EditorCanvas from './EditorCanvas';
+import { Button } from "./ui/button";
 
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const {
@@ -22,6 +20,8 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   } = useMemeStore();
   const { canvas } = useEditorStore();
   const [saving, setSaving] = useState(false);
+  const [scaleStep, setScaleStep] = useState(0.1);
+  const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -177,25 +177,33 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const handleAddText = () => {
     if (!canvas) return;
     const text = new FabricText('New Text', {
+      ...getDefaultTextBoxProps(),
       left: 50,
       top: 50,
-      fontFamily: 'Impact',
-      fill: 'white',
-      stroke: 'black',
-      strokeWidth: 2,
-      strokeLineCap: 'round',
-      strokeLineJoin: 'round',
-      lockUniScaling: true,
-      lockScalingX: true,
-      lockScalingY: true,
-      hasControls: false,
-      hasBorders: false,
-      originX: 'left',
-      originY: 'top',
     });
     canvas.add(text);
     canvas.setActiveObject(text);
     canvas.requestRenderAll();
+  };
+
+  // Scale handlers
+  const handleScaleChange = (delta: number, direction: 'inc' | 'dec') => {
+    if (!canvas) return;
+    const active = canvas.getActiveObject();
+    if (active && (active.type === 'text' || active.type === 'i-text')) {
+      let step = scaleStep;
+      if (lastScaleDirection === direction) {
+        step += 0.1;
+      } else {
+        step = 0.1;
+      }
+      setScaleStep(step);
+      setLastScaleDirection(direction);
+      const currentScale = active.scaleX || 1;
+      const newScale = Math.max(0.1, currentScale + (direction === 'inc' ? step : -step));
+      active.set({ scaleX: newScale, scaleY: newScale });
+      canvas.requestRenderAll();
+    }
   };
 
   // Save all text objects to Supabase
@@ -226,6 +234,9 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
         <Button onClick={handleSave} disabled={saving} variant="default">
           {saving ? 'Saving...' : 'Save'}
         </Button>
+        {/* Scale controls */}
+        <Button onClick={() => handleScaleChange(0.1, 'inc')} variant="outline" title="Increase Scale">+🔍</Button>
+        <Button onClick={() => handleScaleChange(0.1, 'dec')} variant="outline" title="Decrease Scale">-🔍</Button>
       </div>
       <EditorCanvas template={template} />
     </div>

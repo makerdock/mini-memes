@@ -1,5 +1,6 @@
 'use client';
 
+import { getDefaultTextBoxProps } from '@/lib/fabric-defaults';
 import { MemeTemplate } from '@/lib/meme-templates';
 import { useEditorStore } from '@/stores/useEditorStore';
 import classNames from 'classnames';
@@ -90,25 +91,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
         // add the text boxes to the canvas
         template?.text_boxes.forEach(({ text, ...textBox }) => {
           canvas.add(new FabricText(text, {
+            ...getDefaultTextBoxProps(),
             ...textBox,
-            fontFamily: 'Impact',
-            fill: 'white',
-            stroke: 'black',
-            strokeWidth: 2,
-            strokeLineCap: 'round',
-            strokeLineJoin: 'round',
-
-            // preserve aspect ratio
-            lockUniScaling: true,
-            // disable resizing
-            lockScalingX: true,
-            lockScalingY: true,
-            // hide control points
-            hasControls: false,
-            hasBorders: false,
-            // keep origin points
-            originX: 'left',
-            originY: 'top',
           }));
         });
       } catch (error) {
