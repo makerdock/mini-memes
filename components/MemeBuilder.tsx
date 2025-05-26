@@ -15,17 +15,29 @@ import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
 
+// Add MemeApiResponse interface
+interface MemeApiResponse {
+  meme: {
+    id: string;
+    fid: string;
+    image_url: string;
+    template_id: string;
+    created_at: string;
+    caption: string | null;
+    likes_count: number;
+  };
+}
+
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
-  const { setActiveTab } = useMemeStore();
   const { canvas } = useEditorStore();
   const [saving, setSaving] = useState(false);
-  console.log("🚀 ~ MemeBuilder ~ saving:", saving);
-  // const [scaleStep, setScaleStep] = useState(0.1);
-  // const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
+  const [savedMeme, setSavedMeme] = useState<MemeApiResponse['meme'] | null>(null);
   const [activeObject, setActiveObject] = useState<any>(null);
   const { toast } = useToast();
   const { context } = useMiniKit();
   const userFid = context?.user.fid;
+  const [savingMeme, setSavingMeme] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   // Listen for active object changes on the canvas
   useEffect(() => {
@@ -45,44 +57,59 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     };
   }, [canvas]);
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
-
-  // Add a new custom text item
-  // const addCustomTextItem = () => {
-  //   if (customTextItems.length >= 4) {
-  //     alert("You can only add up to 4 custom text items");
-  //     return;
-  //   }
-
-  //   const newItem: CustomTextItem = {
-  //     id: uuidv4(),
-  //     text: "",
-  //     x: canvasDimensions.width / 2,
-  //     y: canvasDimensions.height / 2,
-  //     size: 24, // Default font size
-  //   };
-
-  //   setCustomTextItems([...customTextItems, newItem]);
-  //   setSelectedCustomTextId(newItem.id);
-  // };
-
-  // // Remove a custom text item
-  // const removeCustomTextItem = (id: string) => {
-  //   setCustomTextItems(customTextItems.filter((item) => item.id !== id));
-  //   if (selectedCustomTextId === id) {
-  //     setSelectedCustomTextId(null);
-  //   }
-  // };
-
-  // // Update custom text content
-  // const updateCustomTextContent = (id: string, text: string) => {
-  //   setCustomTextItems(customTextItems.map((item) => (item.id === id ? { ...item, text } : item)));
-  // };
-
   // Share the current canvas to Farcaster
   const handleShare = async () => {
+    if (!canvas) {
+      toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
+      return;
+    }
+    setSharing(true);
+    try {
+      let currentSavedMeme;
+      if (savedMeme) {
+        currentSavedMeme = savedMeme;
+      } else {
+        const result = await saveMemeToDatabase();
+        currentSavedMeme = result?.meme;
+      }
+
+      console.log("🚀 ~ handleShare ~ currentSavedMeme:", currentSavedMeme);
+
+      if (currentSavedMeme) {
+        await sdk.actions.composeCast({
+          text: "here is my banger",
+          embeds: [currentSavedMeme.image_url],
+        });
+      } else {
+        throw new Error('No meme to share');
+      }
+      toast({ title: 'Shared!', description: 'Meme shared to Farcaster!', variant: 'default' });
+    } catch (error) {
+      console.error('Error sharing meme:', error);
+      toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleSaveMeme = async () => {
+    if (!canvas) {
+      toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
+      return;
+    }
+    setSavingMeme(true);
+    try {
+      await saveMemeToDatabase();
+      toast({ title: 'Saved!', description: 'Meme saved to your profile!', variant: 'default' });
+    } catch (error) {
+      console.error('Error saving meme:', error);
+      toast({ title: 'Save failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    } finally {
+      setSavingMeme(false);
+    }
+  };
+
+  const saveMemeToDatabase = async (): Promise<MemeApiResponse | undefined> => {
     if (!canvas) {
       toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
       return;
@@ -94,15 +121,30 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       const watermarkedDataUrl = await addWatermark(dataUrl);
       // Upload to Vercel Blob
       const uploadedUrl = await uploadMemeImage(watermarkedDataUrl);
-      // Share to Farcaster
-      await sdk.actions.composeCast({
-        text: 'Check out my meme created with Mini-Memes!',
-        embeds: [uploadedUrl],
+
+      // Save meme to database with fid and image_url
+      if (!userFid) {
+        toast({ title: 'User not found', description: 'No FID found for user', variant: 'destructive' });
+        return;
+      }
+      const response = await fetch('/api/user-memes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fid: userFid,
+          image_url: uploadedUrl,
+          template_id: template?.id || null,
+        }),
       });
-      toast({ title: 'Shared!', description: 'Meme shared to Farcaster!', variant: 'default' });
+      const data: MemeApiResponse = await response.json();
+      if (!response.ok) {
+        throw new Error((data as any).error || 'Failed to save meme');
+      }
+      setSavedMeme(data.meme);
+      return data;
     } catch (error) {
-      console.error('Error sharing meme:', error);
-      toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+      console.error('Error saving meme:', error);
+      toast({ title: 'Save failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     }
   };
 
@@ -211,7 +253,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   };
 
   // Save all text objects to Supabase
-  const handleSave = async () => {
+  const handleSaveTemplate = async () => {
     console.log("🚀 ~ handleSave ~ canvas || !template:", canvas, template);
 
     if (!canvas || !template) {
@@ -282,7 +324,16 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       {/* Sticky Toolbar at the bottom */}
       <div className="w-full z-50 mt-4">
         <div className=" bg-black/60 rounded-lg shadow-lg p-2 pointer-events-auto border border-white/20 backdrop-blur-md">
-          <Button onClick={handleAddText} variant="secondary">Add Text</Button>
+          <div className="flex justify-between gap-2 border-white/20 items-center">
+            <Button onClick={handleAddText} variant="secondary">Add Text</Button>
+            <div className="h-5 border-l border-white/20"></div>
+            <Button className='flex-1' onClick={handleSaveMeme} variant="secondary" title="Share to Farcaster" disabled={savingMeme || saving}>
+              {savingMeme ? 'Saving...' : 'Save Meme'}
+            </Button>
+            <Button className='flex-1' onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving}>
+              {sharing ? 'Sharing...' : 'Share'}
+            </Button>
+          </div>
           {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
             <div className="flex justify-between gap-2 border-white/20 items-center">
               <div className="flex items-center gap-1">
@@ -295,9 +346,6 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
               </div>
 
               {/* Share Button */}
-              <Button onClick={handleShare} variant="secondary" title="Share to Farcaster">
-                Share
-              </Button>
               <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
                 <Trash className="w-5 h-5" />
               </Button>
@@ -305,7 +353,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
           )}
         </div>
 
-        <Button className="w-full mt-4" onClick={handleSave}>
+        <Button className="w-full mt-4" onClick={handleSaveTemplate}>
           {saving ? 'Saving...' : 'Save Template'}
         </Button>
 
