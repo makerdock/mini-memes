@@ -25,24 +25,17 @@ create index user_memes_created_at_idx on user_memes(created_at desc);
 ## Tasks
 
 ### 1. Database Setup
-- [ ] Create user_memes table in Supabase
-- [ ] Set up appropriate indexes
-- [ ] Add foreign key constraints
-
-### 2. Authentication & User Management
-- [ ] Implement Farcaster authentication
-- [ ] Create user context to store FID
-- [ ] Add authentication middleware
-- [ ] Create protected routes
-- [ ] Add user profile data storage
+- [x] Create user_memes table in Supabase
+- [x] Set up appropriate indexes
+- [x] Add foreign key constraints (template_id only; fid pending users table)
 
 ### 3. Profile Page UI
-- [ ] Create profile page layout
-- [ ] Implement profile header with:
-  - [ ] Profile picture
-  - [ ] Username
-  - [ ] Meme count
-  - [ ] Edit profile button
+- [x] Create profile page layout
+- [x] Implement profile header with:
+  - [x] Profile picture
+  - [x] Username
+  - [x] Meme count
+  - [x] Edit profile button
 - [ ] Create meme grid component
 - [ ] Add loading states and skeletons
 - [ ] Implement responsive design
@@ -51,61 +44,29 @@ create index user_memes_created_at_idx on user_memes(created_at desc);
 ### 4. Meme Card Component
 - [ ] Create meme card layout
 - [ ] Add image display
-- [ ] Implement caption display
-- [ ] Add timestamp
-- [ ] Create engagement buttons:
-  - [ ] Like button
-  - [ ] Comment button
-  - [ ] Share button
-- [ ] Add hover effects
-- [ ] Implement image lazy loading
 
 ### 5. API Endpoints
-- [ ] Create GET /api/user-memes endpoint
+- [x] Create GET /api/user-memes endpoint
 - [ ] Create POST /api/user-memes endpoint
 - [ ] Add pagination support
-- [ ] Implement error handling
-- [ ] Add rate limiting
-- [ ] Create engagement endpoints:
-  - [ ] POST /api/user-memes/:id/like
-  - [ ] POST /api/user-memes/:id/comment
-  - [ ] POST /api/user-memes/:id/share
+- [ ] implement these apis
 
 ### 6. Meme Builder Integration
 - [ ] Modify save functionality to:
   - [ ] Upload to Vercel Blob
   - [ ] Save to user_memes table
-  - [ ] Add caption support
 - [ ] Add success/error notifications
 - [ ] Implement save progress indicator
 
-### 7. Engagement Features
-- [ ] Implement like functionality
-- [ ] Add comment system
-- [ ] Create share modal
-- [ ] Add engagement counters
-- [ ] Implement real-time updates
+### 7. Authentication & User Management
+- [x] Implement Farcaster authentication (via MiniKit)
+- [x] Create user context to store FID (via useMiniKit)
+- [x] Create protected routes (handled via MiniKit context)
+- [x] Add user profile data storage (handled in profile page/API)
 
 ### 8. Profile Management
-- [ ] Add profile picture upload
-- [ ] Create profile edit form
-- [ ] Implement username change
-- [ ] Add bio support
-- [ ] Create settings page
-
-### 9. Performance Optimization
-- [ ] Implement image optimization
-- [ ] Add caching strategies
-- [ ] Optimize database queries
-- [ ] Add loading states
-- [ ] Implement error boundaries
-
-### 10. Testing
-- [ ] Write unit tests
-- [ ] Add integration tests
-- [ ] Implement E2E tests
-- [ ] Add performance tests
-- [ ] Create test documentation
+- [ ] show profile data using useMinikit
+- [ ] show a grid of 3 columns sharing memes
 
 ## Technical Requirements
 
@@ -160,4 +121,8 @@ create index user_memes_created_at_idx on user_memes(created_at desc);
 - Database schema
 - Authentication flow
 - Deployment guide
-- Testing guide 
+- Testing guide
+
+**Progress Note:**
+- Profile page and API endpoint are scaffolded.
+- TODOs remain for wiring up data fetching, rendering the meme grid, and adding pagination to the API. 

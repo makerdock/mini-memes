@@ -9,23 +9,23 @@ import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
-import { Share2, Trash, Plus, Minus } from 'lucide-react';
+import { Minus, Plus, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
+import { useMiniKit } from '@coinbase/onchainkit/minikit';
 
 export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
-  const {
-    generatedMeme,
-    activeTab,
-    setActiveTab
-  } = useMemeStore();
+  const { setActiveTab } = useMemeStore();
   const { canvas } = useEditorStore();
   const [saving, setSaving] = useState(false);
+  console.log("🚀 ~ MemeBuilder ~ saving:", saving);
   // const [scaleStep, setScaleStep] = useState(0.1);
   // const [lastScaleDirection, setLastScaleDirection] = useState<'inc' | 'dec' | null>(null);
   const [activeObject, setActiveObject] = useState<any>(null);
   const { toast } = useToast();
+  const { context } = useMiniKit();
+  const userFid = context?.user.fid;
 
   // Listen for active object changes on the canvas
   useEffect(() => {
@@ -212,7 +212,21 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
 
   // Save all text objects to Supabase
   const handleSave = async () => {
-    if (!canvas || !template) return;
+    console.log("🚀 ~ handleSave ~ canvas || !template:", canvas, template);
+
+    if (!canvas || !template) {
+      console.error('Cannot save: canvas or template is missing.', { canvas, template });
+      toast({
+        title: 'Save failed',
+        description: !canvas && !template
+          ? 'Canvas and template are missing.'
+          : !canvas
+            ? 'Canvas is missing.'
+            : 'Template is missing.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setSaving(true);
     try {
       // Only save FabricText objects
@@ -266,7 +280,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     <div className="flex flex-col h-full w-full relative">
       <EditorCanvas template={template} />
       {/* Sticky Toolbar at the bottom */}
-      <div className="sticky bottom-4 left-0 w-full z-50 pointer-events-none mt-4">
+      <div className="w-full z-50 mt-4">
         <div className=" bg-black/60 rounded-lg shadow-lg p-2 pointer-events-auto border border-white/20 backdrop-blur-md">
           <Button onClick={handleAddText} variant="secondary">Add Text</Button>
           {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
@@ -291,7 +305,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
           )}
         </div>
 
-        <Button className="w-full mt-4" onClick={handleSave} disabled={saving} variant="default">
+        <Button className="w-full mt-4" onClick={handleSave}>
           {saving ? 'Saving...' : 'Save Template'}
         </Button>
 
