@@ -66,9 +66,9 @@ export default function ProfilePage() {
                 <h2 className="text-2xl font-bold text-yellow-300 font-comic">
                     {user?.username || "Username"}
                 </h2>
-                <div className="flex items-center">
+                {!loading && <div className="flex items-center">
                     <span className="text-cyan-200">{memeCount} Memes</span>
-                </div>
+                </div>}
             </div>
 
             {/* Meme Grid */}
