@@ -7,6 +7,7 @@ import { getAllTemplates } from "../lib/meme-templates";
 import { useEffect, useState } from "react";
 import type { MemeTemplate } from "../lib/meme-templates";
 import { Skeleton } from "../components/ui/Skeleton";
+import { BottomNavigation } from "../components/ui/BottomNavigation";
 
 export default function Home() {
   const [templates, setTemplates] = useState<MemeTemplate[]>([]);
@@ -57,6 +58,7 @@ export default function Home() {
         </div>
         <Footer />
       </div>
+      <BottomNavigation />
     </main>
   );
 }
