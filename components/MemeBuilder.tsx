@@ -9,7 +9,7 @@ import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
-import { Share2, Trash } from 'lucide-react';
+import { Share2, Trash, Plus, Minus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
@@ -89,7 +89,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     }
     try {
       // Export canvas as data URL
-      const dataUrl = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 1 });
+      const dataUrl = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 3 });
       // Add watermark
       const watermarkedDataUrl = await addWatermark(dataUrl);
       // Upload to Vercel Blob
@@ -267,30 +267,34 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       <EditorCanvas template={template} />
       {/* Sticky Toolbar at the bottom */}
       <div className="sticky bottom-4 left-0 w-full z-50 pointer-events-none mt-4">
-        <div className="flex gap-2 bg-black/60 rounded-lg shadow-lg px-4 py-2 pointer-events-auto border border-white/20 backdrop-blur-md">
+        <div className=" bg-black/60 rounded-lg shadow-lg p-2 pointer-events-auto border border-white/20 backdrop-blur-md">
           <Button onClick={handleAddText} variant="secondary">Add Text</Button>
-          {/* Share Button */}
-          <Button onClick={handleShare} variant="secondary" title="Share to Farcaster">
-            <Share2 className="w-5 h-5" />
-          </Button>
-          <Button onClick={handleSave} disabled={saving} variant="default">
-            {saving ? 'Saving...' : 'Save Template'}
-          </Button>
-          <div className="flex-1"></div>
-          {/* Font size controls - only show if active object is text */}
           {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
-            <div className="flex items-center gap-1">
-              <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" title="Increase Scale">+</Button>
-              <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" title="Decrease Scale">-</Button>
+            <div className="flex justify-between gap-2 border-white/20 items-center">
+              <div className="flex items-center gap-1">
+                <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" size="icon" title="Increase Scale">
+                  <Plus className="w-5 h-5" />
+                </Button>
+                <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" size="icon" title="Decrease Scale">
+                  <Minus className="w-5 h-5" />
+                </Button>
+              </div>
+
+              {/* Share Button */}
+              <Button onClick={handleShare} variant="secondary" title="Share to Farcaster">
+                Share
+              </Button>
+              <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
+                <Trash className="w-5 h-5" />
+              </Button>
             </div>
           )}
-          {/* Delete button - only show if an object is selected */}
-          {activeObject && (
-            <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
-              <Trash className="w-5 h-5" />
-            </Button>
-          )}
         </div>
+
+        <Button className="w-full mt-4" onClick={handleSave} disabled={saving} variant="default">
+          {saving ? 'Saving...' : 'Save Template'}
+        </Button>
+
       </div>
     </div>
   );
