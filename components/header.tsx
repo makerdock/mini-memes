@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from 'next/link';
 
 export function Header() {
   return (
@@ -13,7 +14,9 @@ export function Header() {
             className="object-contain"
           />
         </div>
-        <h1 className="text-xl font-bold text-yellow-300 text-shadow-neon font-comic">Mini-Memes</h1>
+        <Link href="/">
+          <h1 className="text-xl font-bold text-yellow-300 text-shadow-neon font-comic">Mini-Memes</h1>
+        </Link>
         <div className="relative animate-spin-slow">
           <Image
             src="/vibrant-spinning-star.png"
