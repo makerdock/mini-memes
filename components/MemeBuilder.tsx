@@ -11,6 +11,9 @@ import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
 import { Minus, Plus, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useWalletClient, usePublicClient } from 'wagmi';
+import { parseAbiItem } from 'viem';
+import { Clanker } from 'clanker-sdk';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
@@ -36,8 +39,13 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const { toast } = useToast();
   const { context } = useMiniKit();
   const userFid = context?.user.fid;
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const [savingMeme, setSavingMeme] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [launching, setLaunching] = useState(false);
+
+  const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
   // Listen for active object changes on the canvas
   useEffect(() => {
@@ -89,6 +97,81 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     } finally {
       setSharing(false);
+    }
+  };
+
+  const handleLaunchToken = async () => {
+    if (!canvas) {
+      toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
+      return;
+    }
+    if (!userFid) {
+      toast({ title: 'User not found', description: 'No FID found for user', variant: 'destructive' });
+      return;
+    }
+    if (!walletClient || !publicClient) {
+      toast({ title: 'Wallet not connected', description: 'Connect your wallet first', variant: 'destructive' });
+      return;
+    }
+    setLaunching(true);
+    try {
+      let currentSavedMeme = savedMeme;
+      if (!currentSavedMeme) {
+        const result = await saveMemeToDatabase();
+        currentSavedMeme = result?.meme || null;
+      }
+
+      if (!currentSavedMeme) {
+        throw new Error('No meme image available');
+      }
+
+      const startBlock = await publicClient.getBlockNumber();
+
+      const clanker = new Clanker({ wallet: walletClient, publicClient });
+
+      const tokenAddress = await clanker.deployToken({
+        name: 'Meme Token',
+        symbol: 'MEME',
+        image: currentSavedMeme.image_url,
+        metadata: { description: 'Token launched from Mini Memes' },
+        context: { interface: 'Mini Memes', platform: 'Mini Memes', messageId: userFid.toString(), id: 'MEME' },
+        pool: { quoteToken: '0x4200000000000000000000000000000000000006', initialMarketCap: '1' },
+        devBuy: { ethAmount: '0' },
+        rewardsConfig: {
+          creatorReward: 75,
+          creatorAdmin: walletClient.account.address,
+          creatorRewardRecipient: walletClient.account.address,
+          interfaceAdmin: walletClient.account.address,
+          interfaceRewardRecipient: walletClient.account.address,
+        },
+      });
+
+      const logs = await publicClient.getLogs({
+        address: CLANKER_FACTORY_V3_1,
+        event: parseAbiItem('event TokenCreated(address indexed tokenAddress,address indexed creatorAdmin,address indexed interfaceAdmin,address creatorRewardRecipient,address interfaceRewardRecipient,uint256 positionId,string name,string symbol,int24 startingTickIfToken0IsNewToken,string metadata,uint256 amountTokensBought,uint256 vaultDuration,uint8 vaultPercentage,address msgSender)'),
+        args: { tokenAddress },
+        fromBlock: startBlock,
+        toBlock: 'latest',
+      });
+      const txHash = logs[0]?.transactionHash;
+
+      await fetch('/api/launch-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fid: userFid,
+          image_url: currentSavedMeme.image_url,
+          token_address: tokenAddress,
+          tx_hash: txHash,
+        }),
+      });
+
+      toast({ title: 'Token Launched!', description: tokenAddress, variant: 'default' });
+    } catch (error) {
+      console.error('Error launching token:', error);
+      toast({ title: 'Launch failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    } finally {
+      setLaunching(false);
     }
   };
 
@@ -332,6 +415,9 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
             </Button>
             <Button className='flex-1' onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving}>
               {sharing ? 'Sharing...' : 'Share'}
+            </Button>
+            <Button className='flex-1' onClick={handleLaunchToken} variant="secondary" disabled={launching || savingMeme || saving}>
+              {launching ? 'Launching...' : 'Launch Token'}
             </Button>
           </div>
           {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
