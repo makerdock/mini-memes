@@ -14,6 +14,9 @@ import { useEffect, useState } from 'react';
 import { useWalletClient, usePublicClient } from 'wagmi';
 import { parseAbiItem } from 'viem';
 import { Clanker } from 'clanker-sdk';
+import { createCoin } from '@zoralabs/coins-sdk';
+import { uploadMetadata } from '@/lib/utils';
+import { CoinModal } from './CoinModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
@@ -44,6 +47,8 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const [savingMeme, setSavingMeme] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [launching, setLaunching] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [coinModalOpen, setCoinModalOpen] = useState(false);
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
@@ -172,6 +177,50 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
       toast({ title: 'Launch failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     } finally {
       setLaunching(false);
+    }
+  };
+
+  const handlePostToZora = async (data: { name: string; symbol: string; description: string }) => {
+    if (!walletClient || !publicClient) {
+      toast({ title: 'Wallet not connected', description: 'Connect your wallet first', variant: 'destructive' });
+      return;
+    }
+    setPosting(true);
+    try {
+      let currentSavedMeme = savedMeme;
+      if (!currentSavedMeme) {
+        const result = await saveMemeToDatabase();
+        currentSavedMeme = result?.meme || null;
+      }
+      if (!currentSavedMeme) {
+        throw new Error('No meme image available');
+      }
+
+      const metadataUri = await uploadMetadata({
+        name: data.name,
+        symbol: data.symbol,
+        description: data.description,
+        image: currentSavedMeme.image_url,
+      });
+
+      const result = await createCoin(
+        {
+          name: data.name,
+          symbol: data.symbol,
+          uri: metadataUri,
+          payoutRecipient: walletClient.account.address as `0x${string}`,
+          platformReferrer: '0x2CD1353Cf0E402770643B54011A63B546a189c44',
+        },
+        walletClient as any,
+        publicClient as any,
+      );
+
+      toast({ title: 'Coin Minted!', description: result.address, variant: 'default' });
+    } catch (error) {
+      console.error('Error posting to Zora:', error);
+      toast({ title: 'Mint failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    } finally {
+      setPosting(false);
     }
   };
 
@@ -419,6 +468,9 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
             <Button className='flex-1' onClick={handleLaunchToken} variant="secondary" disabled={launching || savingMeme || saving}>
               {launching ? 'Launching...' : 'Launch Token'}
             </Button>
+            <Button className='flex-1' onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving}>
+              {posting ? 'Minting...' : 'Post to Zora'}
+            </Button>
           </div>
           {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
             <div className="flex justify-between gap-2 border-white/20 items-center">
@@ -444,6 +496,12 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
         </Button>
 
       </div>
+      <CoinModal
+        isOpen={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        onSubmit={handlePostToZora}
+        defaultValues={{ name: 'My Coin', symbol: 'COIN', description: '' }}
+      />
     </div>
   );
 }
