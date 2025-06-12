@@ -34,11 +34,14 @@ interface MemeApiResponse {
   };
 }
 
-export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
+export function MemeBuilder({ template, templateId }: { template?: MemeTemplate; templateId?: string; }) {
   const { canvas } = useEditorStore();
   const [saving, setSaving] = useState(false);
   const [savedMeme, setSavedMeme] = useState<MemeApiResponse['meme'] | null>(null);
   const [activeObject, setActiveObject] = useState<any>(null);
+  const [currentTemplate, setCurrentTemplate] = useState<MemeTemplate | null>(template || null);
+  const [loading, setLoading] = useState(!!templateId && !template);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { context } = useMiniKit();
   const userFid = context?.user.fid;
@@ -51,6 +54,30 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
   const [coinModalOpen, setCoinModalOpen] = useState(false);
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
+
+  // Fetch template when templateId is provided
+  useEffect(() => {
+    if (!templateId || template) return;
+    
+    async function fetchTemplate() {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`/api/meme-template/${templateId}`);
+        if (!res.ok) {
+          throw new Error('Template not found');
+        }
+        const templateData = await res.json();
+        setCurrentTemplate(templateData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load template');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTemplate();
+  }, [templateId, template]);
 
   // Listen for active object changes on the canvas
   useEffect(() => {
@@ -210,6 +237,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
           uri: metadataUri,
           payoutRecipient: walletClient.account.address as `0x${string}`,
           platformReferrer: '0x2CD1353Cf0E402770643B54011A63B546a189c44',
+          chainId: 8453, // Base chain ID
         },
         walletClient as any,
         publicClient as any,
@@ -265,7 +293,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
         body: JSON.stringify({
           fid: userFid,
           image_url: uploadedUrl,
-          template_id: template?.id || null,
+          template_id: currentTemplate?.id || null,
         }),
       });
       const data: MemeApiResponse = await response.json();
@@ -386,13 +414,13 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
 
   // Save all text objects to Supabase
   const handleSaveTemplate = async () => {
-    console.log("🚀 ~ handleSave ~ canvas || !template:", canvas, template);
+    console.log("🚀 ~ handleSave ~ canvas || !currentTemplate:", canvas, currentTemplate);
 
-    if (!canvas || !template) {
-      console.error('Cannot save: canvas or template is missing.', { canvas, template });
+    if (!canvas || !currentTemplate) {
+      console.error('Cannot save: canvas or template is missing.', { canvas, currentTemplate });
       toast({
         title: 'Save failed',
-        description: !canvas && !template
+        description: !canvas && !currentTemplate
           ? 'Canvas and template are missing.'
           : !canvas
             ? 'Canvas is missing.'
@@ -405,7 +433,7 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     try {
       // Only save FabricText objects
       const textObjects = canvas.getObjects().filter(obj => obj.type === 'text' || obj.type === 'i-text');
-      await updateTemplateTextBoxes(template.id, textObjects.map(obj => obj.toObject()));
+      await updateTemplateTextBoxes(currentTemplate.id, textObjects.map(obj => obj.toObject()));
       toast({ title: "Saved!", description: "Saved text boxes to Supabase!", variant: "default" });
     } catch (err) {
       toast({ title: "Save failed", description: 'Failed to save: ' + (err instanceof Error ? err.message : err), variant: "destructive" });
@@ -446,13 +474,17 @@ export function MemeBuilder({ template }: { template?: MemeTemplate; }) {
     }
   };
 
-  if (!template) {
-    return <div className="text-center p-8 text-xl font-comic text-red-400">Template not found.</div>;
+  if (loading) {
+    return <div className="text-center p-8 text-xl font-comic">Loading template...</div>;
+  }
+
+  if (error || !currentTemplate) {
+    return <div className="text-center p-8 text-xl font-comic text-red-400">{error || 'Template not found.'}</div>;
   }
 
   return (
     <div className="flex flex-col h-full w-full relative">
-      <EditorCanvas template={template} />
+      <EditorCanvas template={currentTemplate} />
       {/* Sticky Toolbar at the bottom */}
       <div className="w-full z-50 mt-4">
         <div className=" bg-black/60 rounded-lg shadow-lg p-2 pointer-events-auto border border-white/20 backdrop-blur-md">
