@@ -17,6 +17,7 @@ import { Clanker } from 'clanker-sdk';
 import { createCoin } from '@zoralabs/coins-sdk';
 import { uploadMetadata } from '@/lib/utils';
 import { CoinModal } from './CoinModal';
+import { WalletSelectionModal } from './WalletSelectionModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
@@ -52,6 +53,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [launching, setLaunching] = useState(false);
   const [posting, setPosting] = useState(false);
   const [coinModalOpen, setCoinModalOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'launch' | 'zora' | null>(null);
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
@@ -141,7 +144,14 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       toast({ title: 'User not found', description: 'No FID found for user', variant: 'destructive' });
       return;
     }
-    if (!walletClient || !publicClient) {
+    
+    // Open wallet selection modal
+    setPendingAction('launch');
+    setWalletModalOpen(true);
+  };
+
+  const executeLaunchToken = async (selectedWalletClient: any) => {
+    if (!selectedWalletClient || !publicClient) {
       toast({ title: 'Wallet not connected', description: 'Connect your wallet first', variant: 'destructive' });
       return;
     }
@@ -159,22 +169,22 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
       const startBlock = await publicClient.getBlockNumber();
 
-      const clanker = new Clanker({ wallet: walletClient, publicClient });
+      const clanker = new Clanker({ wallet: selectedWalletClient, publicClient });
 
       const tokenAddress = await clanker.deployToken({
         name: 'Meme Token',
         symbol: 'MEME',
         image: currentSavedMeme.image_url,
         metadata: { description: 'Token launched from Mini Memes' },
-        context: { interface: 'Mini Memes', platform: 'Mini Memes', messageId: userFid.toString(), id: 'MEME' },
+        context: { interface: 'Mini Memes', platform: 'Mini Memes', messageId: userFid?.toString() || '', id: 'MEME' },
         pool: { quoteToken: '0x4200000000000000000000000000000000000006', initialMarketCap: '1' },
         devBuy: { ethAmount: '0' },
         rewardsConfig: {
           creatorReward: 75,
-          creatorAdmin: walletClient.account.address,
-          creatorRewardRecipient: walletClient.account.address,
-          interfaceAdmin: walletClient.account.address,
-          interfaceRewardRecipient: walletClient.account.address,
+          creatorAdmin: selectedWalletClient.account.address,
+          creatorRewardRecipient: selectedWalletClient.account.address,
+          interfaceAdmin: selectedWalletClient.account.address,
+          interfaceRewardRecipient: selectedWalletClient.account.address,
         },
       });
 
@@ -208,7 +218,16 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   };
 
   const handlePostToZora = async (data: { name: string; symbol: string; description: string }) => {
-    if (!walletClient || !publicClient) {
+    // Store the coin data and open wallet selection
+    setPendingAction('zora');
+    setWalletModalOpen(true);
+    // Store data temporarily for later use
+    (window as any).tempCoinData = data;
+  };
+
+  const executePostToZora = async (selectedWalletClient: any) => {
+    const data = (window as any).tempCoinData;
+    if (!selectedWalletClient || !publicClient) {
       toast({ title: 'Wallet not connected', description: 'Connect your wallet first', variant: 'destructive' });
       return;
     }
@@ -235,11 +254,11 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
           name: data.name,
           symbol: data.symbol,
           uri: metadataUri,
-          payoutRecipient: walletClient.account.address as `0x${string}`,
+          payoutRecipient: selectedWalletClient.account.address as `0x${string}`,
           platformReferrer: '0x2CD1353Cf0E402770643B54011A63B546a189c44',
           chainId: 8453, // Base chain ID
         },
-        walletClient as any,
+        selectedWalletClient as any,
         publicClient as any,
       );
 
@@ -474,6 +493,16 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
   };
 
+  // Handle wallet selection
+  const handleWalletSelected = async (selectedWalletClient: any) => {
+    if (pendingAction === 'launch') {
+      await executeLaunchToken(selectedWalletClient);
+    } else if (pendingAction === 'zora') {
+      await executePostToZora(selectedWalletClient);
+    }
+    setPendingAction(null);
+  };
+
   if (loading) {
     return <div className="text-center p-8 text-xl font-comic">Loading template...</div>;
   }
@@ -486,53 +515,73 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     <div className="flex flex-col h-full w-full relative">
       <EditorCanvas template={currentTemplate} />
       {/* Sticky Toolbar at the bottom */}
-      <div className="w-full z-50 mt-4">
-        <div className=" bg-black/60 rounded-lg shadow-lg p-2 pointer-events-auto border border-white/20 backdrop-blur-md">
-          <div className="flex justify-between gap-2 border-white/20 items-center">
-            <Button onClick={handleAddText} variant="secondary">Add Text</Button>
-            <div className="h-5 border-l border-white/20"></div>
-            <Button className='flex-1' onClick={handleSaveMeme} variant="secondary" title="Share to Farcaster" disabled={savingMeme || saving}>
+      <div className="w-full z-50 mt-4 space-y-2">
+        <div className="bg-black/60 rounded-lg shadow-lg p-3 pointer-events-auto border border-white/20 backdrop-blur-md space-y-3">
+          
+          {/* Row 1: Editing Tools */}
+          <div className="flex items-center gap-2">
+            <Button onClick={handleAddText} variant="secondary" className="px-4">
+              Add Text
+            </Button>
+            {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
+              <>
+                <div className="h-5 border-l border-white/30 mx-1"></div>
+                <div className="flex items-center gap-1">
+                  <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" size="icon" title="Increase Scale">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" size="icon" title="Decrease Scale">
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Row 2: Action Buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button onClick={handleSaveMeme} variant="secondary" disabled={savingMeme || saving} className="text-sm">
               {savingMeme ? 'Saving...' : 'Save Meme'}
             </Button>
-            <Button className='flex-1' onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving}>
+            <Button onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving} className="text-sm">
               {sharing ? 'Sharing...' : 'Share'}
             </Button>
-            <Button className='flex-1' onClick={handleLaunchToken} variant="secondary" disabled={launching || savingMeme || saving}>
+            <Button onClick={handleLaunchToken} variant="secondary" disabled={launching || savingMeme || saving} className="text-sm">
               {launching ? 'Launching...' : 'Launch Token'}
             </Button>
-            <Button className='flex-1' onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving}>
+            <Button onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving} className="text-sm">
               {posting ? 'Minting...' : 'Post to Zora'}
             </Button>
           </div>
-          {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
-            <div className="flex justify-between gap-2 border-white/20 items-center">
-              <div className="flex items-center gap-1">
-                <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" size="icon" title="Increase Scale">
-                  <Plus className="w-5 h-5" />
-                </Button>
-                <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" size="icon" title="Decrease Scale">
-                  <Minus className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Share Button */}
-              <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
-                <Trash className="w-5 h-5" />
-              </Button>
-            </div>
-          )}
         </div>
 
-        <Button className="w-full mt-4" onClick={handleSaveTemplate}>
+        {/* Row 3: Template Actions (separate panel) */}
+        <Button className="w-full" onClick={handleSaveTemplate} variant="outline">
           {saving ? 'Saving...' : 'Save Template'}
         </Button>
-
       </div>
       <CoinModal
         isOpen={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
         onSubmit={handlePostToZora}
         defaultValues={{ name: 'My Coin', symbol: 'COIN', description: '' }}
+      />
+      <WalletSelectionModal
+        isOpen={walletModalOpen}
+        onClose={() => {
+          setWalletModalOpen(false);
+          setPendingAction(null);
+        }}
+        onWalletSelected={handleWalletSelected}
+        title={pendingAction === 'launch' ? 'Launch Token' : 'Mint to Zora'}
+        description={
+          pendingAction === 'launch' 
+            ? 'Choose a wallet to launch your meme token' 
+            : 'Choose a wallet to mint your meme as an NFT'
+        }
       />
     </div>
   );
