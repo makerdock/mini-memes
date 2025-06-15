@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { X, Wallet } from 'lucide-react';
@@ -15,18 +15,35 @@ interface WalletSelectionModalProps {
   description: string;
 }
 
-export function WalletSelectionModal({ 
-  isOpen, 
-  onClose, 
-  onWalletSelected, 
-  title, 
-  description 
+export function WalletSelectionModal({
+  isOpen,
+  onClose,
+  onWalletSelected,
+  title,
+  description
 }: WalletSelectionModalProps) {
   const [connecting, setConnecting] = useState(false);
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { context } = useMiniKit();
+
+  // Effect to handle wallet connection completion
+  React.useEffect(() => {
+    if (isConnected && address && connecting) {
+      setTimeout(() => {
+        // Get the full wallet client from the connector
+        const connector = connectors.find(c => c.ready);
+        if (connector) {
+          onWalletSelected(connector);
+        } else {
+          console.error('No ready connector found');
+        }
+        onClose();
+        setConnecting(false);
+      }, 100);
+    }
+  }, [isConnected, address, connecting, onWalletSelected, onClose, connectors]);
 
   if (!isOpen) return null;
 
@@ -35,7 +52,12 @@ export function WalletSelectionModal({
     try {
       if (isConnected && address) {
         // Use the currently connected wallet (Farcaster wallet)
-        onWalletSelected({ account: { address } });
+        const connector = connectors.find(c => c.ready);
+        if (connector) {
+          onWalletSelected(connector);
+        } else {
+          console.error('No ready connector found');
+        }
         onClose();
       } else {
         // Connect to Farcaster wallet first
@@ -57,7 +79,7 @@ export function WalletSelectionModal({
       if (isConnected) {
         await disconnect();
       }
-      
+
       // Connect to external wallet
       if (connectors.length > 1) {
         await connect({ connector: connectors[1] }); // Use other connector if available
@@ -71,17 +93,6 @@ export function WalletSelectionModal({
       setConnecting(false);
     }
   };
-
-  // Effect to handle wallet connection completion
-  React.useEffect(() => {
-    if (isConnected && address && connecting) {
-      setTimeout(() => {
-        onWalletSelected({ account: { address } });
-        onClose();
-        setConnecting(false);
-      }, 100);
-    }
-  }, [isConnected, address, connecting, onWalletSelected, onClose]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -106,7 +117,7 @@ export function WalletSelectionModal({
 
           <div className="space-y-3">
             {/* Farcaster Wallet Option */}
-            <Button 
+            <Button
               onClick={handleUseFarcasterWallet}
               disabled={connecting}
               className="w-full p-4 h-auto flex flex-col items-center gap-2"
@@ -122,7 +133,7 @@ export function WalletSelectionModal({
             </Button>
 
             {/* Other Wallet Option */}
-            <Button 
+            <Button
               onClick={handleConnectOtherWallet}
               disabled={connecting}
               className="w-full p-4 h-auto flex flex-col items-center gap-2"

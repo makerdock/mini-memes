@@ -61,7 +61,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   // Fetch template when templateId is provided
   useEffect(() => {
     if (!templateId || template) return;
-    
+
     async function fetchTemplate() {
       try {
         setLoading(true);
@@ -144,7 +144,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       toast({ title: 'User not found', description: 'No FID found for user', variant: 'destructive' });
       return;
     }
-    
+
     // Open wallet selection modal
     setPendingAction('launch');
     setWalletModalOpen(true);
@@ -249,17 +249,25 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         image: currentSavedMeme.image_url,
       });
 
+      console.log("🚀 ~ executePostToZora ~ metadataUri:", metadataUri);
+
+      // Get the wallet client from the connector
+      const walletClient = await selectedWalletClient.getWalletClient();
+      if (!walletClient) {
+        throw new Error('Failed to get wallet client from connector');
+      }
+
       const result = await createCoin(
         {
           name: data.name,
           symbol: data.symbol,
           uri: metadataUri,
-          payoutRecipient: selectedWalletClient.account.address as `0x${string}`,
+          payoutRecipient: walletClient.account.address as `0x${string}`,
           platformReferrer: '0x2CD1353Cf0E402770643B54011A63B546a189c44',
           chainId: 8453, // Base chain ID
         },
-        selectedWalletClient as any,
-        publicClient as any,
+        walletClient,
+        publicClient,
       );
 
       toast({ title: 'Coin Minted!', description: result.address, variant: 'default' });
@@ -517,7 +525,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       {/* Sticky Toolbar at the bottom */}
       <div className="w-full z-50 mt-4 space-y-2">
         <div className="bg-black/60 rounded-lg shadow-lg p-3 pointer-events-auto border border-white/20 backdrop-blur-md space-y-3">
-          
+
           {/* Row 1: Editing Tools */}
           <div className="flex items-center gap-2">
             <Button onClick={handleAddText} variant="secondary" className="px-4">
@@ -578,8 +586,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         onWalletSelected={handleWalletSelected}
         title={pendingAction === 'launch' ? 'Launch Token' : 'Mint to Zora'}
         description={
-          pendingAction === 'launch' 
-            ? 'Choose a wallet to launch your meme token' 
+          pendingAction === 'launch'
+            ? 'Choose a wallet to launch your meme token'
             : 'Choose a wallet to mint your meme as an NFT'
         }
       />
