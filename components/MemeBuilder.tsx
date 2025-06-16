@@ -1,7 +1,5 @@
 "use client";
 
-import { sdk } from "@farcaster/frame-sdk";
-
 import { useToast } from "@/hooks/use-toast";
 import { getDefaultTextBoxProps } from '@/lib/fabric-defaults';
 import type { MemeTemplate } from '@/lib/meme-templates';
@@ -11,7 +9,7 @@ import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
 import { Minus, Plus, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useWalletClient, usePublicClient, useConnect, useAccount } from 'wagmi';
+import { useWalletClient, usePublicClient, useConnect, useAccount, type Connector } from 'wagmi';
 import { parseAbiItem } from 'viem';
 import { Clanker } from 'clanker-sdk';
 import { createCoin } from '@zoralabs/coins-sdk';
@@ -20,6 +18,7 @@ import { CoinModal } from './CoinModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
+import sdk from "@farcaster/frame-sdk";
 
 // Add MemeApiResponse interface
 interface MemeApiResponse {
@@ -145,11 +144,14 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
 
     try {
-      if (!isConnected && connectors[0]) {
-        await connect({ connector: connectors[0] });
-      }
-      if (connectors[0]) {
-        await executeLaunchToken(connectors[0]);
+      console.log("🚀 ~ handleLaunchToken ~ farcasterConnector:", connectors, isConnected, context);
+      if (isConnected && context) {
+        const farcasterConnector = connectors.find((connector: Connector) => connector.id === "farcaster");
+        if (farcasterConnector) {
+          connect({
+            connector: farcasterConnector,
+          });
+        }
       } else {
         toast({ title: 'Wallet not available', description: 'No Farcaster wallet connector found', variant: 'destructive' });
       }
@@ -267,12 +269,6 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       });
 
       console.log("🚀 ~ executePostToZora ~ metadataUri:", metadataUri);
-
-      // Get the wallet client from the connector
-      const walletClient = await selectedWalletClient.getWalletClient();
-      if (!walletClient) {
-        throw new Error('Failed to get wallet client from connector');
-      }
 
       const result = await createCoin(
         {

@@ -16,15 +16,6 @@ const config = createConfig({
   },
   connectors: [
     farcasterFrame(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
-      metadata: {
-        name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME!,
-        description: "Mini Memes",
-        url: process.env.NEXT_PUBLIC_URL!,
-        icons: [process.env.NEXT_PUBLIC_ICON_URL!],
-      },
-    }),
   ],
 });
 
