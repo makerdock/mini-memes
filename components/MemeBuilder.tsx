@@ -16,6 +16,7 @@ import { createCoin } from '@zoralabs/coins-sdk';
 import { uploadMetadata } from '@/lib/utils';
 import { CoinModal } from './CoinModal';
 import { LaunchTokenModal } from './LaunchTokenModal';
+import { LaunchSuccessModal } from './LaunchSuccessModal';
 import { ZoraSuccessModal } from './ZoraSuccessModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
@@ -55,6 +56,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [launching, setLaunching] = useState(false);
   const [posting, setPosting] = useState(false);
   const [launchModalOpen, setLaunchModalOpen] = useState(false);
+  const [launchSuccessOpen, setLaunchSuccessOpen] = useState(false);
+  const [launchedAddress, setLaunchedAddress] = useState("");
+  const [launchedImage, setLaunchedImage] = useState("");
   const [coinModalOpen, setCoinModalOpen] = useState(false);
   const [zoraModalOpen, setZoraModalOpen] = useState(false);
   const [zoraLink, setZoraLink] = useState("");
@@ -220,7 +224,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
           tx_hash: txHash,
         }),
       });
-
+      setLaunchedAddress(tokenAddress);
+      setLaunchedImage(currentSavedMeme.image_url);
+      setLaunchSuccessOpen(true);
       toast({ title: 'Token Launched!', description: tokenAddress, variant: 'default' });
     } catch (error) {
       console.error('Error launching token:', error);
@@ -307,6 +313,20 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       setZoraModalOpen(false);
     } catch (error) {
       console.error('Error sharing coin:', error);
+      toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    }
+  };
+
+  const handleShareLaunch = async () => {
+    try {
+      await sdk.actions.composeCast({
+        text: `Launched token: ${launchedAddress}`,
+        embeds: [launchedImage],
+      });
+      toast({ title: 'Shared!', description: 'Token shared to Farcaster!', variant: 'default' });
+      setLaunchSuccessOpen(false);
+    } catch (error) {
+      console.error('Error sharing token:', error);
       toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     }
   };
@@ -605,6 +625,13 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         onClose={() => setLaunchModalOpen(false)}
         onSubmit={handleLaunchToken}
         defaultValues={{ name: 'Meme Token', symbol: 'MEME', description: 'Token launched from Mini Memes' }}
+      />
+      <LaunchSuccessModal
+        isOpen={launchSuccessOpen}
+        onClose={() => setLaunchSuccessOpen(false)}
+        onShare={handleShareLaunch}
+        tokenAddress={launchedAddress}
+        imageUrl={launchedImage}
       />
       <ZoraSuccessModal
         isOpen={zoraModalOpen}
