@@ -15,6 +15,7 @@ import { Clanker } from 'clanker-sdk';
 import { createCoin } from '@zoralabs/coins-sdk';
 import { uploadMetadata } from '@/lib/utils';
 import { CoinModal } from './CoinModal';
+import { LaunchTokenModal } from './LaunchTokenModal';
 import { ZoraSuccessModal } from './ZoraSuccessModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
@@ -53,6 +54,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [sharing, setSharing] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [launchModalOpen, setLaunchModalOpen] = useState(false);
   const [coinModalOpen, setCoinModalOpen] = useState(false);
   const [zoraModalOpen, setZoraModalOpen] = useState(false);
   const [zoraLink, setZoraLink] = useState("");
@@ -138,7 +140,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
   };
 
-  const handleLaunchToken = async () => {
+  const handleLaunchToken = async (data: { name: string; symbol: string; description: string }) => {
+    setLaunchModalOpen(false);
     if (!canvas) {
       toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
       return;
@@ -150,13 +153,16 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
     try {
       const farcasterConnector = connectors.find((connector: Connector) => connector.id === "farcaster");
-      await executeLaunchToken(farcasterConnector);
+      await executeLaunchToken(farcasterConnector, data);
     } catch (error) {
       console.error('Error connecting wallet:', error);
     }
   };
 
-  const executeLaunchToken = async (selectedWalletClient: any) => {
+  const executeLaunchToken = async (
+    selectedWalletClient: any,
+    data: { name: string; symbol: string; description: string }
+  ) => {
     console.log("🚀 ~ executeLaunchToken ~ selectedWalletClient:", selectedWalletClient);
     if (!selectedWalletClient || !publicClient) {
       toast({ title: 'Wallet not connected', description: 'Connect your wallet first', variant: 'destructive' });
@@ -179,11 +185,11 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       const clanker = new Clanker({ wallet: walletClient, publicClient });
 
       const tokenAddress = await clanker.deployToken({
-        name: 'Meme Token',
-        symbol: 'MEME',
+        name: data.name,
+        symbol: data.symbol,
         image: currentSavedMeme.image_url,
-        metadata: { description: 'Token launched from Mini Memes' },
-        context: { interface: 'Mini Memes', platform: 'Mini Memes', messageId: userFid?.toString() || '', id: 'MEME' },
+        metadata: { description: data.description },
+        context: { interface: 'Mini Memes', platform: 'Mini Memes', messageId: userFid?.toString() || '', id: data.symbol },
         pool: { quoteToken: '0x4200000000000000000000000000000000000006', initialMarketCap: '1' },
         devBuy: { ethAmount: '0' },
         rewardsConfig: {
@@ -574,7 +580,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
             <Button onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving} className="text-sm">
               {sharing ? 'Sharing...' : 'Share'}
             </Button>
-            <Button onClick={handleLaunchToken} variant="secondary" disabled={launching || savingMeme || saving} className="text-sm">
+            <Button onClick={() => setLaunchModalOpen(true)} variant="secondary" disabled={launching || savingMeme || saving} className="text-sm">
               {launching ? 'Launching...' : 'Launch Token'}
             </Button>
             <Button onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving} className="text-sm">
@@ -593,6 +599,12 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         onClose={() => setCoinModalOpen(false)}
         onSubmit={handlePostToZora}
         defaultValues={{ name: 'My Coin', symbol: 'COIN', description: '' }}
+      />
+      <LaunchTokenModal
+        isOpen={launchModalOpen}
+        onClose={() => setLaunchModalOpen(false)}
+        onSubmit={handleLaunchToken}
+        defaultValues={{ name: 'Meme Token', symbol: 'MEME', description: 'Token launched from Mini Memes' }}
       />
       <ZoraSuccessModal
         isOpen={zoraModalOpen}

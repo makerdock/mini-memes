@@ -13,8 +13,8 @@ export function ZoraSuccessModal({ isOpen, onClose, onShare, zoraLink }: ZoraSuc
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white p-4 w-80 rounded-md text-black space-y-4 relative">
-        <button onClick={onClose} className="absolute right-2 top-2 text-black">
+      <div className="bg-black/80 border border-white/20 backdrop-blur-md p-4 w-80 rounded-lg text-white space-y-4 relative">
+        <button onClick={onClose} className="absolute right-2 top-2 text-white">
           <X className="w-4 h-4" />
         </button>
         <h2 className="text-lg font-bold text-center">Coin Minted!</h2>
