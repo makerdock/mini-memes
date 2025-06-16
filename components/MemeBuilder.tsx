@@ -188,6 +188,10 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
       const clanker = new Clanker({ wallet: walletClient, publicClient });
 
+      if (!address) {
+        throw new Error('Wallet address not found');
+      }
+
       const tokenAddress = await clanker.deployToken({
         name: data.name,
         symbol: data.symbol,
