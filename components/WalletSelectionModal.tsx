@@ -23,6 +23,7 @@ export function WalletSelectionModal({
   description
 }: WalletSelectionModalProps) {
   const [connecting, setConnecting] = useState(false);
+  const [selectedConnector, setSelectedConnector] = useState<any>(null);
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
@@ -30,20 +31,13 @@ export function WalletSelectionModal({
 
   // Effect to handle wallet connection completion
   React.useEffect(() => {
-    if (isConnected && address && connecting) {
-      setTimeout(() => {
-        // Get the full wallet client from the connector
-        const connector = connectors.find(c => c.ready);
-        if (connector) {
-          onWalletSelected(connector);
-        } else {
-          console.error('No ready connector found');
-        }
-        onClose();
-        setConnecting(false);
-      }, 100);
+    if (isConnected && address && connecting && selectedConnector) {
+      onWalletSelected(selectedConnector);
+      onClose();
+      setConnecting(false);
+      setSelectedConnector(null);
     }
-  }, [isConnected, address, connecting, onWalletSelected, onClose, connectors]);
+  }, [isConnected, address, connecting, selectedConnector, onWalletSelected, onClose]);
 
   if (!isOpen) return null;
 
@@ -52,18 +46,15 @@ export function WalletSelectionModal({
     try {
       if (isConnected && address) {
         // Use the currently connected wallet (Farcaster wallet)
-        const connector = connectors.find(c => c.ready);
-        if (connector) {
-          onWalletSelected(connector);
-        } else {
-          console.error('No ready connector found');
-        }
+        onWalletSelected(connectors[0]);
         onClose();
+        setConnecting(false);
       } else {
         // Connect to Farcaster wallet first
         if (connectors[0]) {
+          setSelectedConnector(connectors[0]);
           await connect({ connector: connectors[0] });
-          // The wallet will be handled in the effect below after connection
+          // onWalletSelected will be triggered in effect
         }
       }
     } catch (error) {
@@ -80,16 +71,12 @@ export function WalletSelectionModal({
         await disconnect();
       }
 
-      // Connect to external wallet
-      if (connectors.length > 1) {
-        await connect({ connector: connectors[1] }); // Use other connector if available
-      } else {
-        // Fallback to the same connector but allow re-connection
-        await connect({ connector: connectors[0] });
-      }
+      // Determine which connector to use
+      const connector = connectors.length > 1 ? connectors[1] : connectors[0];
+      setSelectedConnector(connector);
+      await connect({ connector });
     } catch (error) {
       console.error('Failed to connect to external wallet:', error);
-    } finally {
       setConnecting(false);
     }
   };
