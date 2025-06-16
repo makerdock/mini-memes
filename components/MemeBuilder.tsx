@@ -274,6 +274,10 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         throw new Error('No meme image available');
       }
 
+      if (!walletClient?.account?.address) {
+        throw new Error('Wallet not connected or address not found');
+      }
+
       const metadataUri = await uploadMetadata({
         name: data.name,
         symbol: data.symbol,
@@ -288,7 +292,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
           name: data.name,
           symbol: data.symbol,
           uri: metadataUri,
-          payoutRecipient: walletClient.account.address as `0x${string}`,
+          payoutRecipient: walletClient?.account?.address as `0x${string}`,
           platformReferrer: '0x2CD1353Cf0E402770643B54011A63B546a189c44',
           chainId: 8453, // Base chain ID
         },
