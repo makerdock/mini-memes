@@ -15,6 +15,7 @@ import { Clanker } from 'clanker-sdk';
 import { createCoin } from '@zoralabs/coins-sdk';
 import { uploadMetadata } from '@/lib/utils';
 import { CoinModal } from './CoinModal';
+import { ZoraSuccessModal } from './ZoraSuccessModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
@@ -53,6 +54,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [launching, setLaunching] = useState(false);
   const [posting, setPosting] = useState(false);
   const [coinModalOpen, setCoinModalOpen] = useState(false);
+  const [zoraModalOpen, setZoraModalOpen] = useState(false);
+  const [zoraLink, setZoraLink] = useState("");
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
@@ -283,12 +286,28 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         publicClient,
       );
 
+      const link = `https://zora.co/coin/base:${result.address}`;
+      setZoraLink(link);
+      setZoraModalOpen(true);
       toast({ title: 'Coin Minted!', description: result.address, variant: 'default' });
     } catch (error) {
       console.error('Error posting to Zora:', error);
       toast({ title: 'Mint failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     } finally {
       setPosting(false);
+    }
+  };
+
+  const handleShareZora = async () => {
+    try {
+      await sdk.actions.composeCast({
+        embeds: [zoraLink],
+      });
+      toast({ title: 'Shared!', description: 'Coin shared to Farcaster!', variant: 'default' });
+      setZoraModalOpen(false);
+    } catch (error) {
+      console.error('Error sharing coin:', error);
+      toast({ title: 'Share failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
     }
   };
 
@@ -580,6 +599,12 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         onClose={() => setCoinModalOpen(false)}
         onSubmit={handlePostToZora}
         defaultValues={{ name: 'My Coin', symbol: 'COIN', description: '' }}
+      />
+      <ZoraSuccessModal
+        isOpen={zoraModalOpen}
+        onClose={() => setZoraModalOpen(false)}
+        onShare={handleShareZora}
+        zoraLink={zoraLink}
       />
     </div>
   );
