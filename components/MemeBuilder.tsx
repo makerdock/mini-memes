@@ -11,13 +11,12 @@ import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
 import { Minus, Plus, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useWalletClient, usePublicClient } from 'wagmi';
+import { useWalletClient, usePublicClient, useConnect, useAccount } from 'wagmi';
 import { parseAbiItem } from 'viem';
 import { Clanker } from 'clanker-sdk';
 import { createCoin } from '@zoralabs/coins-sdk';
 import { uploadMetadata } from '@/lib/utils';
 import { CoinModal } from './CoinModal';
-import { WalletSelectionModal } from './WalletSelectionModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
@@ -48,13 +47,13 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const userFid = context?.user.fid;
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
+  const { connect, connectors } = useConnect();
+  const { isConnected } = useAccount();
   const [savingMeme, setSavingMeme] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [posting, setPosting] = useState(false);
   const [coinModalOpen, setCoinModalOpen] = useState(false);
-  const [walletModalOpen, setWalletModalOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'launch' | 'zora' | null>(null);
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
@@ -145,9 +144,18 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       return;
     }
 
-    // Open wallet selection modal
-    setPendingAction('launch');
-    setWalletModalOpen(true);
+    try {
+      if (!isConnected && connectors[0]) {
+        await connect({ connector: connectors[0] });
+      }
+      if (connectors[0]) {
+        await executeLaunchToken(connectors[0]);
+      } else {
+        toast({ title: 'Wallet not available', description: 'No Farcaster wallet connector found', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+    }
   };
 
   const executeLaunchToken = async (selectedWalletClient: any) => {
@@ -218,11 +226,20 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   };
 
   const handlePostToZora = async (data: { name: string; symbol: string; description: string }) => {
-    // Store the coin data and open wallet selection
-    setPendingAction('zora');
-    setWalletModalOpen(true);
-    // Store data temporarily for later use
+    setCoinModalOpen(false);
     (window as any).tempCoinData = data;
+    try {
+      if (!isConnected && connectors[0]) {
+        await connect({ connector: connectors[0] });
+      }
+      if (connectors[0]) {
+        await executePostToZora(connectors[0]);
+      } else {
+        toast({ title: 'Wallet not available', description: 'No Farcaster wallet connector found', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+    }
   };
 
   const executePostToZora = async (selectedWalletClient: any) => {
@@ -501,15 +518,6 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
   };
 
-  // Handle wallet selection
-  const handleWalletSelected = async (selectedWalletClient: any) => {
-    if (pendingAction === 'launch') {
-      await executeLaunchToken(selectedWalletClient);
-    } else if (pendingAction === 'zora') {
-      await executePostToZora(selectedWalletClient);
-    }
-    setPendingAction(null);
-  };
 
   if (loading) {
     return <div className="text-center p-8 text-xl font-comic">Loading template...</div>;
@@ -576,20 +584,6 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         onClose={() => setCoinModalOpen(false)}
         onSubmit={handlePostToZora}
         defaultValues={{ name: 'My Coin', symbol: 'COIN', description: '' }}
-      />
-      <WalletSelectionModal
-        isOpen={walletModalOpen}
-        onClose={() => {
-          setWalletModalOpen(false);
-          setPendingAction(null);
-        }}
-        onWalletSelected={handleWalletSelected}
-        title={pendingAction === 'launch' ? 'Launch Token' : 'Mint to Zora'}
-        description={
-          pendingAction === 'launch'
-            ? 'Choose a wallet to launch your meme token'
-            : 'Choose a wallet to mint your meme as an NFT'
-        }
       />
     </div>
   );
