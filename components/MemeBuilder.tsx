@@ -56,6 +56,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [coinModalOpen, setCoinModalOpen] = useState(false);
   const [zoraModalOpen, setZoraModalOpen] = useState(false);
   const [zoraLink, setZoraLink] = useState("");
+  const { address } = useAccount();
+  console.log("🚀 ~ MemeBuilder ~ address:", address)
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
@@ -147,23 +149,15 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
 
     try {
-      console.log("🚀 ~ handleLaunchToken ~ farcasterConnector:", connectors, isConnected, context);
-      if (isConnected && context) {
-        const farcasterConnector = connectors.find((connector: Connector) => connector.id === "farcaster");
-        if (farcasterConnector) {
-          connect({
-            connector: farcasterConnector,
-          });
-        }
-      } else {
-        toast({ title: 'Wallet not available', description: 'No Farcaster wallet connector found', variant: 'destructive' });
-      }
+      const farcasterConnector = connectors.find((connector: Connector) => connector.id === "farcaster");
+      await executeLaunchToken(farcasterConnector);
     } catch (error) {
       console.error('Error connecting wallet:', error);
     }
   };
 
   const executeLaunchToken = async (selectedWalletClient: any) => {
+    console.log("🚀 ~ executeLaunchToken ~ selectedWalletClient:", selectedWalletClient);
     if (!selectedWalletClient || !publicClient) {
       toast({ title: 'Wallet not connected', description: 'Connect your wallet first', variant: 'destructive' });
       return;
@@ -182,7 +176,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
       const startBlock = await publicClient.getBlockNumber();
 
-      const clanker = new Clanker({ wallet: selectedWalletClient, publicClient });
+      const clanker = new Clanker({ wallet: walletClient, publicClient });
 
       const tokenAddress = await clanker.deployToken({
         name: 'Meme Token',
@@ -194,10 +188,10 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         devBuy: { ethAmount: '0' },
         rewardsConfig: {
           creatorReward: 75,
-          creatorAdmin: selectedWalletClient.account.address,
-          creatorRewardRecipient: selectedWalletClient.account.address,
-          interfaceAdmin: selectedWalletClient.account.address,
-          interfaceRewardRecipient: selectedWalletClient.account.address,
+          creatorAdmin: address,
+          creatorRewardRecipient: address,
+          interfaceAdmin: address,
+          interfaceRewardRecipient: address,
         },
       });
 
