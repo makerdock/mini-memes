@@ -4,6 +4,8 @@ import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import { type ReactNode } from "react";
 import { base } from "wagmi/chains";
 import { WagmiProvider, createConfig, http } from "wagmi";
+import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+import { walletConnect } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Create Wagmi config
@@ -13,8 +15,17 @@ const config = createConfig({
     [base.id]: http(),
   },
   connectors: [
-    farcasterFrame()
-  ]
+    farcasterFrame(),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+      metadata: {
+        name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME!,
+        description: "Mini Memes",
+        url: process.env.NEXT_PUBLIC_URL!,
+        icons: [process.env.NEXT_PUBLIC_ICON_URL!],
+      },
+    }),
+  ],
 });
 
 // Create Query Client
