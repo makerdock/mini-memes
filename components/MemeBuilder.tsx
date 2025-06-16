@@ -130,7 +130,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       if (currentSavedMeme) {
         await sdk.actions.composeCast({
           text: "here is my banger",
-          embeds: [currentSavedMeme.image_url],
+          embeds: [currentSavedMeme.image_url, 'https://www.mini-memes.xyz/'],
         });
       } else {
         throw new Error('No meme to share');
