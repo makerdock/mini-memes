@@ -590,9 +590,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         </div>
 
         {/* Row 3: Template Actions (separate panel) */}
-        <Button className="w-full" onClick={handleSaveTemplate} variant="outline">
+        {/* <Button className="w-full" onClick={handleSaveTemplate} variant="outline">
           {saving ? 'Saving...' : 'Save Template'}
-        </Button>
+        </Button> */}
       </div>
       <CoinModal
         isOpen={coinModalOpen}
