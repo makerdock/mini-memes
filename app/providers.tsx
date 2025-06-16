@@ -4,6 +4,8 @@ import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import { type ReactNode } from "react";
 import { base } from "wagmi/chains";
 import { WagmiProvider, createConfig, http } from "wagmi";
+import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+import { walletConnect } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Create Wagmi config
@@ -13,8 +15,8 @@ const config = createConfig({
     [base.id]: http(),
   },
   connectors: [
-    farcasterFrame()
-  ]
+    farcasterFrame(),
+  ],
 });
 
 // Create Query Client
