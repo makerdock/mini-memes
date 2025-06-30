@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { X } from "lucide-react"
+import { X, Copy, Check } from "lucide-react"
 import { Button } from "./ui/button"
+import Image from "next/image"
 
 interface LaunchSuccessModalProps {
   isOpen: boolean
@@ -12,10 +13,11 @@ interface LaunchSuccessModalProps {
 
 export function LaunchSuccessModal({ isOpen, onClose, onShare, tokenAddress, imageUrl }: LaunchSuccessModalProps) {
   const [copied, setCopied] = useState(false)
-  const handleCopy = () => {
-    navigator.clipboard.writeText(tokenAddress)
+  
+  const handleCopyAddress = async () => {
+    await navigator.clipboard.writeText(tokenAddress)
     setCopied(true)
-    setTimeout(() => setCopied(false), 1000)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   if (!isOpen) return null
@@ -27,15 +29,28 @@ export function LaunchSuccessModal({ isOpen, onClose, onShare, tokenAddress, ima
           <X className="w-4 h-4" />
         </button>
         <h2 className="text-lg font-bold text-center">Token Launched!</h2>
-        <img src={imageUrl} alt="Token" className="w-full rounded" />
-        <div className="flex items-center gap-2 text-xs break-all">
-          <span className="flex-1">{tokenAddress}</span>
-          <Button type="button" variant="secondary" size="sm" onClick={handleCopy}>
-            {copied ? 'Copied' : 'Copy'}
-          </Button>
+        
+        <div className="flex items-center justify-center gap-2 p-1 bg-white/10 rounded-md">
+          <span className="text-[10px] text-gray-300 font-mono truncate">
+            {tokenAddress}
+          </span>
+          <button
+            onClick={handleCopyAddress}
+            className="text-gray-300 hover:text-white transition-colors"
+          >
+            {copied ? <Check className="w-2 h-2" /> : <Copy className="w-2 h-2" />}
+          </button>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={onShare}>
+
+        <div className="flex justify-center gap-2 pt-2">
+          <Button type="button" onClick={onShare} className="flex items-center gap-2 bg-white/10 font-bold text-white hover:bg-gray-100">
+            <Image
+              src="/farcaster.png"
+              alt="Farcaster"
+              width={16}
+              height={16}
+              className="w-4 h-4"
+            />
             Share
           </Button>
         </div>
