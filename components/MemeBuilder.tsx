@@ -71,7 +71,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   console.log("🚀 ~ MemeBuilder ~ address:", address)
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
-  
+
   // Get allowed FIDs from environment variable
   const allowedSaveFids = process.env.NEXT_PUBLIC_ALLOWED_SAVE_FIDS?.split(',').map(fid => parseInt(fid.trim())) || [];
 
@@ -318,9 +318,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
       const link = `https://zora.co/coin/base:${result.address}`;
       setZoraLink(link);
-      setContractAddress(result.address);
+      setContractAddress(result.address || '');
       setZoraModalOpen(true);
-      toast({ title: 'Coin Minted!', description: result.address, variant: 'default' });
+      // toast({ title: 'Coin Minted!', description: result.address || 'Unknown address', variant: 'default' });
     } catch (error) {
       console.error('Error posting to Zora:', error);
       toast({ title: 'Mint failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
@@ -416,7 +416,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   // Add watermark to image
   const addWatermark = async (imageUrl: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const image = new Image();
+      const image = new window.Image();
       image.onload = () => {
         // Create a canvas for the watermarked image
         const canvas = document.createElement("canvas");
@@ -555,7 +555,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     setActiveObject(null);
     canvas.discardActiveObject();
     canvas.requestRenderAll();
-    
+
     // Check if there are any text objects remaining
     const hasTextObjects = canvas.getObjects().some(obj => obj.type === 'text' || obj.type === 'i-text');
     if (!hasTextObjects) {
@@ -611,19 +611,19 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
             >
               <motion.div
                 layout
-                animate={{ 
-                  width: showTextTools ? "auto" : "100%" 
+                animate={{
+                  width: showTextTools ? "auto" : "100%"
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <Button 
-                  onClick={handleAddText} 
+                <Button
+                  onClick={handleAddText}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
                 >
                   Add Text
                 </Button>
               </motion.div>
-              
+
               {/* Font Controls - Animated entry */}
               <AnimatePresence>
                 {showTextTools && (
@@ -639,20 +639,20 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
                       <CaseSensitive className="w-4 h-4 text-white/70" />
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button 
-                        onClick={() => handleScaleChange(0.2, 'dec')} 
-                        variant="outline" 
-                        size="icon" 
+                      <Button
+                        onClick={() => handleScaleChange(0.2, 'dec')}
+                        variant="outline"
+                        size="icon"
                         title="Decrease Font Size"
                         disabled={!activeObject || (activeObject.type !== 'text' && activeObject.type !== 'i-text')}
                         className="h-8 w-8"
                       >
                         <Minus className="w-3 h-3" />
                       </Button>
-                      <Button 
-                        onClick={() => handleScaleChange(0.2, 'inc')} 
-                        variant="outline" 
-                        size="icon" 
+                      <Button
+                        onClick={() => handleScaleChange(0.2, 'inc')}
+                        variant="outline"
+                        size="icon"
                         title="Increase Font Size"
                         disabled={!activeObject || (activeObject.type !== 'text' && activeObject.type !== 'i-text')}
                         className="h-8 w-8"

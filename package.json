@@ -29,6 +29,7 @@
     "fabric": "^6.6.5",
     "fabricjs-extension": "^0.2.30",
     "fabricjs-react": "^2.1.0",
+    "framer-motion": "^12.20.1",
     "lucide-react": "^0.509.0",
     "minikit": "link:@coinbase/onchainkit/minikit",
     "motion": "^12.10.5",
