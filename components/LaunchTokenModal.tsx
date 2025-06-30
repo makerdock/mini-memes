@@ -45,7 +45,7 @@ export function LaunchTokenModal({ isOpen, onClose, onSubmit, defaultValues }: L
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Launch</Button>
+            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white border-0">Launch</Button>
           </div>
         </form>
       </div>

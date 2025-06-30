@@ -7,8 +7,10 @@ import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
 import { IText } from 'fabric';
-import { Minus, Plus, Trash } from 'lucide-react';
+import { Minus, Plus, Trash, Save, CaseSensitive } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWalletClient, usePublicClient, useConnect, useAccount, type Connector } from 'wagmi';
 import { parseAbiItem } from 'viem';
 import { Clanker } from 'clanker-sdk';
@@ -20,6 +22,7 @@ import { LaunchSuccessModal } from './LaunchSuccessModal';
 import { ZoraSuccessModal } from './ZoraSuccessModal';
 import EditorCanvas from './EditorCanvas';
 import { Button } from "./ui/button";
+import { BottomNavigation } from './ui/BottomNavigation';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import sdk from "@farcaster/frame-sdk";
 
@@ -62,10 +65,15 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [coinModalOpen, setCoinModalOpen] = useState(false);
   const [zoraModalOpen, setZoraModalOpen] = useState(false);
   const [zoraLink, setZoraLink] = useState("");
+  const [contractAddress, setContractAddress] = useState("");
+  const [showTextTools, setShowTextTools] = useState(false);
   const { address } = useAccount();
   console.log("🚀 ~ MemeBuilder ~ address:", address)
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
+  
+  // Get allowed FIDs from environment variable
+  const allowedSaveFids = process.env.NEXT_PUBLIC_ALLOWED_SAVE_FIDS?.split(',').map(fid => parseInt(fid.trim())) || [];
 
   // Fetch template when templateId is provided
   useEffect(() => {
@@ -97,9 +105,17 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     const handleSelection = () => {
       setActiveObject(canvas.getActiveObject());
     };
+    const handleSelectionCleared = () => {
+      setActiveObject(null);
+      // Check if there are any text objects on canvas
+      const hasTextObjects = canvas.getObjects().some(obj => obj.type === 'text' || obj.type === 'i-text');
+      if (!hasTextObjects) {
+        setShowTextTools(false);
+      }
+    };
     canvas.on('selection:created', handleSelection);
     canvas.on('selection:updated', handleSelection);
-    canvas.on('selection:cleared', () => setActiveObject(null));
+    canvas.on('selection:cleared', handleSelectionCleared);
     // Set initial active object
     setActiveObject(canvas.getActiveObject());
     return () => {
@@ -129,8 +145,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
       if (currentSavedMeme) {
         await sdk.actions.composeCast({
-          text: "here is my banger",
-          embeds: [currentSavedMeme.image_url, 'https://www.mini-memes.xyz/'],
+          text: "I made a mini-meme, and you should too!",
+          embeds: [currentSavedMeme.image_url, 'https://mini-memes.xyz/'],
         });
       } else {
         throw new Error('No meme to share');
@@ -302,6 +318,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
       const link = `https://zora.co/coin/base:${result.address}`;
       setZoraLink(link);
+      setContractAddress(result.address);
       setZoraModalOpen(true);
       toast({ title: 'Coin Minted!', description: result.address, variant: 'default' });
     } catch (error) {
@@ -315,6 +332,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const handleShareZora = async () => {
     try {
       await sdk.actions.composeCast({
+        text: "I made a mini-meme and coined it!",
         embeds: [zoraLink],
       });
       toast({ title: 'Shared!', description: 'Coin shared to Farcaster!', variant: 'default' });
@@ -482,6 +500,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     canvas.add(text);
     canvas.setActiveObject(text);
     canvas.requestRenderAll();
+    setShowTextTools(true);
   };
 
   // Scale handlers
@@ -536,6 +555,12 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     setActiveObject(null);
     canvas.discardActiveObject();
     canvas.requestRenderAll();
+    
+    // Check if there are any text objects remaining
+    const hasTextObjects = canvas.getObjects().some(obj => obj.type === 'text' || obj.type === 'i-text');
+    if (!hasTextObjects) {
+      setShowTextTools(false);
+    }
   };
 
   // Upload image to Vercel Blob
@@ -571,50 +596,132 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   }
 
   return (
-    <div className="flex flex-col h-full w-full relative">
+    <div className="flex flex-col h-full w-full relative pb-16">
       <EditorCanvas template={currentTemplate} />
       {/* Sticky Toolbar at the bottom */}
       <div className="w-full z-50 mt-4 space-y-2">
         <div className="bg-black/60 rounded-lg shadow-lg p-3 pointer-events-auto border border-white/20 backdrop-blur-md space-y-3">
 
           {/* Row 1: Editing Tools */}
-          <div className="flex items-center gap-2">
-            <Button onClick={handleAddText} variant="secondary" className="px-4">
-              Add Text
-            </Button>
-            {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
-              <>
-                <div className="h-5 border-l border-white/30 mx-1"></div>
-                <div className="flex items-center gap-1">
-                  <Button onClick={() => handleScaleChange(0.2, 'inc')} variant="outline" size="icon" title="Increase Scale">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                  <Button onClick={() => handleScaleChange(0.2, 'dec')} variant="outline" size="icon" title="Decrease Scale">
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon">
-                    <Trash className="w-4 h-4" />
-                  </Button>
-                </div>
-              </>
-            )}
+          <div className="space-y-2">
+            {/* Add Text Button - Dynamic Width */}
+            <motion.div
+              layout
+              className="flex items-center gap-2"
+            >
+              <motion.div
+                layout
+                animate={{ 
+                  width: showTextTools ? "auto" : "100%" 
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <Button 
+                  onClick={handleAddText} 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0"
+                >
+                  Add Text
+                </Button>
+              </motion.div>
+              
+              {/* Font Controls - Animated entry */}
+              <AnimatePresence>
+                {showTextTools && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0, x: -20 }}
+                    animate={{ opacity: 1, width: "auto", x: 0 }}
+                    exit={{ opacity: 0, width: 0, x: -20 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="flex items-center gap-2 overflow-hidden"
+                  >
+                    <div className="h-5 border-l border-white/30"></div>
+                    <div className="flex items-center gap-1">
+                      <CaseSensitive className="w-4 h-4 text-white/70" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        onClick={() => handleScaleChange(0.2, 'dec')} 
+                        variant="outline" 
+                        size="icon" 
+                        title="Decrease Font Size"
+                        disabled={!activeObject || (activeObject.type !== 'text' && activeObject.type !== 'i-text')}
+                        className="h-8 w-8"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <Button 
+                        onClick={() => handleScaleChange(0.2, 'inc')} 
+                        variant="outline" 
+                        size="icon" 
+                        title="Increase Font Size"
+                        disabled={!activeObject || (activeObject.type !== 'text' && activeObject.type !== 'i-text')}
+                        className="h-8 w-8"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
+                      <>
+                        <div className="h-4 border-l border-white/30"></div>
+                        <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon" className="h-8 w-8">
+                          <Trash className="w-3 h-3" />
+                        </Button>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </div>
 
           {/* Row 2: Action Buttons */}
-          <div className="grid grid-cols-2 gap-2">
-            <Button onClick={handleSaveMeme} variant="secondary" disabled={savingMeme || saving} className="text-sm">
-              {savingMeme ? 'Saving...' : 'Save Meme'}
-            </Button>
-            <Button onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving} className="text-sm">
-              {sharing ? 'Sharing...' : 'Share'}
-            </Button>
-            <Button onClick={() => setLaunchModalOpen(true)} variant="secondary" disabled={launching || savingMeme || saving} className="text-sm">
-              {launching ? 'Launching...' : 'Launch Token'}
-            </Button>
-            <Button onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving} className="text-sm">
-              {posting ? 'Minting...' : 'Post to Zora'}
-            </Button>
-          </div>
+          {allowedSaveFids.includes(userFid || 0) ? (
+            // Four buttons layout for allowed FIDs
+            <div className="grid grid-cols-2 gap-2">
+              {/* Top Left: Share */}
+              <Button onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving} className="text-sm flex items-center gap-2">
+                <Image src="/farcaster.png" alt="Farcaster" width={16} height={16} className="w-4 h-4" />
+                {sharing ? 'Sharing...' : 'Share'}
+              </Button>
+              {/* Top Right: Coin It */}
+              <Button onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving} className="text-sm flex items-center gap-2">
+                <Image src="/Zorb.svg" alt="Zora" width={16} height={16} className="w-4 h-4" />
+                {posting ? 'Minting...' : 'Coin It'}
+              </Button>
+              {/* Bottom Left: Clank it */}
+              <Button onClick={() => setLaunchModalOpen(true)} variant="secondary" disabled={launching || savingMeme || saving} className="text-sm flex items-center gap-2">
+                <Image src="/clanker.png" alt="Clanker" width={16} height={16} className="w-4 h-4" />
+                {launching ? 'Launching...' : 'Clank it'}
+              </Button>
+              {/* Bottom Right: Save Meme */}
+              <Button onClick={handleSaveMeme} variant="secondary" disabled={savingMeme || saving} className="text-sm flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {savingMeme ? 'Saving...' : 'Save Meme'}
+              </Button>
+            </div>
+          ) : (
+            // Three buttons layout for other users
+            <div className="space-y-2">
+              {/* Top: Share - Full Width */}
+              <Button onClick={handleShare} variant="secondary" title="Share to Farcaster" disabled={sharing || saving} className="w-full text-sm flex items-center justify-center gap-2">
+                <Image src="/farcaster.png" alt="Farcaster" width={16} height={16} className="w-4 h-4" />
+                {sharing ? 'Sharing...' : 'Share'}
+              </Button>
+              {/* Bottom Row: Two buttons side by side */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* Bottom Left: Coin It */}
+                <Button onClick={() => setCoinModalOpen(true)} variant="secondary" disabled={posting || savingMeme || saving} className="text-sm flex items-center gap-2">
+                  <Image src="/Zorb.svg" alt="Zora" width={16} height={16} className="w-4 h-4" />
+                  {posting ? 'Minting...' : 'Coin It'}
+                </Button>
+                {/* Bottom Right: Clank it */}
+                <Button onClick={() => setLaunchModalOpen(true)} variant="secondary" disabled={launching || savingMeme || saving} className="text-sm flex items-center gap-2">
+                  <Image src="/clanker.png" alt="Clanker" width={16} height={16} className="w-4 h-4" />
+                  {launching ? 'Launching...' : 'Clank it'}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Row 3: Template Actions (separate panel) */}
@@ -646,7 +753,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
         onClose={() => setZoraModalOpen(false)}
         onShare={handleShareZora}
         zoraLink={zoraLink}
+        contractAddress={contractAddress}
       />
+      <BottomNavigation />
     </div>
   );
 }

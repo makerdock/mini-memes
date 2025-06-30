@@ -45,7 +45,7 @@ export function CoinModal({ isOpen, onClose, onSubmit, defaultValues }: CoinModa
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button type="submit">Mint Coin</Button>
+            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white border-0">Coin on Zora</Button>
           </div>
         </form>
       </div>
