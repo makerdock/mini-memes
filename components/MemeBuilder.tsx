@@ -346,8 +346,8 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const handleShareLaunch = async () => {
     try {
       await sdk.actions.composeCast({
-        text: `Launched token: ${launchedAddress}`,
-        embeds: [launchedImage],
+        text: `I made a mini-meme and clanked it! ${launchedAddress}`,
+        embeds: [launchedImage, 'https://mini-memes.xyz/'],
       });
       toast({ title: 'Shared!', description: 'Token shared to Farcaster!', variant: 'default' });
       setLaunchSuccessOpen(false);
