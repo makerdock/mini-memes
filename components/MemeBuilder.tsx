@@ -539,7 +539,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const handleTextInputChange = (value: string) => {
     setTextInputValue(value);
     if (!canvas || !activeObject) return;
-    
+
     if (activeObject.type === 'text') {
       activeObject.set('text', value);
       canvas.requestRenderAll();
@@ -635,10 +635,48 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   }
 
   return (
-    <div className="flex flex-col h-full w-full relative pb-16">
+    <div className="flex flex-col h-full w-full relative pb-16 space-y-2">
       <EditorCanvas template={currentTemplate} />
+
+      {/* Floating Text Input */}
+      <AnimatePresence>
+        {isEditingText && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: 20, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="sticky bottom-20 left-0 right-0 z-50"
+          >
+            <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg p-3 flex items-center gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={textInputValue}
+                onChange={(e) => handleTextInputChange(e.target.value)}
+                className="flex-1 bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter text..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleTextSubmit();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleTextSubmit}
+                size="icon"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                title="Submit and deselect"
+              >
+                <Check className="w-4 h-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Sticky Toolbar at the bottom */}
-      <div className="w-full z-50 mt-4 space-y-2">
+      <div className="w-full z-50 space-y-2">
         <div className="bg-black/60 rounded-lg shadow-lg p-3 pointer-events-auto border border-white/20 backdrop-blur-md space-y-3">
 
           {/* Row 1: Editing Tools */}
@@ -769,44 +807,6 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
           {saving ? 'Saving...' : 'Save Template'}
         </Button> */}
       </div>
-
-      {/* Floating Text Input */}
-      <AnimatePresence>
-        {isEditingText && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-2 left-0 right-0 px-4 z-50"
-          >
-            <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg p-3 flex items-center gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={textInputValue}
-                onChange={(e) => handleTextInputChange(e.target.value)}
-                className="flex-1 bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter text..."
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleTextSubmit();
-                  }
-                }}
-              />
-              <Button
-                onClick={handleTextSubmit}
-                size="icon"
-                className="bg-green-600 hover:bg-green-700 text-white"
-                title="Submit and deselect"
-              >
-                <Check className="w-4 h-4" />
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <CoinModal
         isOpen={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
