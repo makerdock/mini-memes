@@ -95,6 +95,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
           canvas.add(new IText(text, {
             ...getDefaultTextBoxProps(),
             ...safeTextBox,
+            lockUniScaling: true,
+            originX: 'center',
+            originY: 'center',
           }));
         });
       } catch (error) {

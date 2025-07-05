@@ -509,6 +509,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       ...getDefaultTextBoxProps(),
       left: 50,
       top: 50,
+      lockUniScaling: true,
+      originX: 'center',
+      originY: 'center',
     });
     canvas.add(text);
     canvas.setActiveObject(text);

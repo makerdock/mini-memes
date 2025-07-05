@@ -9,8 +9,8 @@ export function getDefaultTextBoxProps() {
         hasControls: true,
         hasBorders: true,
         padding: 4,
-        originX: 'left' as const,
-        originY: 'top' as const,
+        originX: 'center' as const,
+        originY: 'center' as const,
         selectable: true,
         evented: true,
         borderColor: 'black',
@@ -18,5 +18,6 @@ export function getDefaultTextBoxProps() {
         cornerStyle: 'circle',
         transparentCorners: false,
         textAlign: 'center',
+        lockUniScaling: true,
     } as const;
 } 
