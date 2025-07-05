@@ -17,6 +17,9 @@ importers:
       '@farcaster/frame-wagmi-connector':
         specifier: ^0.0.52
         version: 0.0.52(@farcaster/frame-sdk@0.0.63(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.63))(@wagmi/core@2.17.1(@tanstack/query-core@5.75.7)(@types/react@18.3.21)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.29.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.63)))(viem@2.29.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.63))
+      '@farcaster/quick-auth':
+        specifier: ^0.0.7
+        version: 0.0.7(typescript@5.8.3)
       '@radix-ui/react-accordion':
         specifier: ^1.2.10
         version: 1.2.10(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -253,6 +256,11 @@ packages:
 
   '@farcaster/quick-auth@0.0.6':
     resolution: {integrity: sha512-tiZndhpfDtEhaKlkmS5cVDuS+A/tafqZT3y9I44rC69m3beJok6e8dIH2JhxVy3EvOWTyTBnrmNn6GOOh+qK6A==}
+    peerDependencies:
+      typescript: 5.8.3
+
+  '@farcaster/quick-auth@0.0.7':
+    resolution: {integrity: sha512-FNHlizdwjLmX7MQjsArGuj7SVfrQ9UCqk9JIiMaBt/J9WtIEZQxFtilKYjaIDyd4gZiZ9EImKVvR2bVyd8ExeQ==}
     peerDependencies:
       typescript: 5.8.3
 
@@ -4122,8 +4130,8 @@ snapshots:
 
   '@farcaster/frame-core@0.0.26(typescript@5.8.3)':
     dependencies:
-      ox: 0.4.4(typescript@5.8.3)(zod@3.24.4)
-      zod: 3.24.4
+      ox: 0.4.4(typescript@5.8.3)(zod@3.25.63)
+      zod: 3.25.63
     transitivePeerDependencies:
       - typescript
 
@@ -4175,6 +4183,12 @@ snapshots:
       viem: 2.29.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.63)
 
   '@farcaster/quick-auth@0.0.6(typescript@5.8.3)':
+    dependencies:
+      jose: 5.10.0
+      typescript: 5.8.3
+      zod: 3.25.63
+
+  '@farcaster/quick-auth@0.0.7(typescript@5.8.3)':
     dependencies:
       jose: 5.10.0
       typescript: 5.8.3

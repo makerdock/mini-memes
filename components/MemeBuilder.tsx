@@ -6,9 +6,9 @@ import type { MemeTemplate } from '@/lib/meme-templates';
 import { updateTemplateTextBoxes } from '@/lib/meme-templates';
 import { useMemeStore } from '@/stores/use-meme-store';
 import { useEditorStore } from '@/stores/useEditorStore';
-import { IText } from 'fabric';
-import { Minus, Plus, Trash, Save, CaseSensitive } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Text } from 'fabric';
+import { Minus, Plus, Trash, Save, CaseSensitive, Check } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWalletClient, usePublicClient, useConnect, useAccount, type Connector } from 'wagmi';
@@ -44,6 +44,9 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [saving, setSaving] = useState(false);
   const [savedMeme, setSavedMeme] = useState<MemeApiResponse['meme'] | null>(null);
   const [activeObject, setActiveObject] = useState<any>(null);
+  const [textInputValue, setTextInputValue] = useState<string>('');
+  const [isEditingText, setIsEditingText] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [currentTemplate, setCurrentTemplate] = useState<MemeTemplate | null>(template || null);
   const [loading, setLoading] = useState(!!templateId && !template);
   const [error, setError] = useState<string | null>(null);
@@ -102,19 +105,26 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   useEffect(() => {
     if (!canvas) return;
     const handleSelection = () => {
-      setActiveObject(canvas.getActiveObject());
+      const newActiveObject = canvas.getActiveObject();
+      setActiveObject(newActiveObject);
 
-      const activeObject = canvas.getActiveObject();
-      if (activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text')) {
+      if (newActiveObject && newActiveObject.type === 'text') {
         setShowTextTools(true);
+        setIsEditingText(true);
+        setTextInputValue(newActiveObject.text || '');
+        // Focus the input after a small delay to ensure it's rendered
+        setTimeout(() => inputRef.current?.focus(), 100);
       } else {
         setShowTextTools(false);
+        setIsEditingText(false);
       }
     };
 
     const handleSelectionCleared = () => {
       setActiveObject(null);
       setShowTextTools(false);
+      setIsEditingText(false);
+      setTextInputValue('');
     };
     canvas.on('selection:created', handleSelection);
     canvas.on('selection:updated', handleSelection);
@@ -495,7 +505,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   // Add a new text element to the canvas
   const handleAddText = () => {
     if (!canvas) return;
-    const text = new IText('New Text', {
+    const text = new Text('New Text', {
       ...getDefaultTextBoxProps(),
       left: 50,
       top: 50,
@@ -504,13 +514,17 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     canvas.setActiveObject(text);
     canvas.requestRenderAll();
     setShowTextTools(true);
+    setIsEditingText(true);
+    setTextInputValue('New Text');
+    // Focus the input after a small delay
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   // Scale handlers
   const handleScaleChange = (delta: number, direction: 'inc' | 'dec') => {
     if (!canvas) return;
     const active = canvas.getActiveObject();
-    if (active && (active.type === 'text' || active.type === 'i-text')) {
+    if (active && active.type === 'text') {
       const step = delta;
       const currentScale = active.scaleX || 1;
       const newScale = Math.max(0.1, currentScale + (direction === 'inc' ? step : -step));
@@ -519,6 +533,27 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       canvas.setActiveObject(active);
       canvas.requestRenderAll();
     }
+  };
+
+  // Handle text input changes
+  const handleTextInputChange = (value: string) => {
+    setTextInputValue(value);
+    if (!canvas || !activeObject) return;
+    
+    if (activeObject.type === 'text') {
+      activeObject.set('text', value);
+      canvas.requestRenderAll();
+    }
+  };
+
+  // Handle submit button click
+  const handleTextSubmit = () => {
+    if (!canvas) return;
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    setIsEditingText(false);
+    setTextInputValue('');
+    setShowTextTools(false);
   };
 
   // Save all text objects to Supabase
@@ -541,7 +576,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     setSaving(true);
     try {
       // Only save FabricText objects
-      const textObjects = canvas.getObjects().filter(obj => obj.type === 'text' || obj.type === 'i-text');
+      const textObjects = canvas.getObjects().filter(obj => obj.type === 'text');
       await updateTemplateTextBoxes(currentTemplate.id, textObjects.map(obj => obj.toObject()));
       toast({ title: "Saved!", description: "Saved text boxes to Supabase!", variant: "default" });
     } catch (err) {
@@ -560,9 +595,10 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     canvas.requestRenderAll();
 
     // Check if there are any text objects remaining
-    const hasTextObjects = canvas.getObjects().some(obj => obj.type === 'text' || obj.type === 'i-text');
+    const hasTextObjects = canvas.getObjects().some(obj => obj.type === 'text');
     if (!hasTextObjects) {
       setShowTextTools(false);
+      setIsEditingText(false);
     }
   };
 
@@ -648,7 +684,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
                         variant="outline"
                         size="icon"
                         title="Decrease Font Size"
-                        disabled={!activeObject || (activeObject.type !== 'text' && activeObject.type !== 'i-text')}
+                        disabled={!activeObject || activeObject.type !== 'text'}
                         className="h-8 w-8"
                       >
                         <Minus className="w-3 h-3" />
@@ -658,13 +694,13 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
                         variant="outline"
                         size="icon"
                         title="Increase Font Size"
-                        disabled={!activeObject || (activeObject.type !== 'text' && activeObject.type !== 'i-text')}
+                        disabled={!activeObject || activeObject.type !== 'text'}
                         className="h-8 w-8"
                       >
                         <Plus className="w-3 h-3" />
                       </Button>
                     </div>
-                    {activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text') && (
+                    {activeObject && activeObject.type === 'text' && (
                       <>
                         <div className="h-4 border-l border-white/30"></div>
                         <Button onClick={handleDelete} variant="destructive" title="Delete Selected" size="icon" className="h-8 w-8">
@@ -733,6 +769,44 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
           {saving ? 'Saving...' : 'Save Template'}
         </Button> */}
       </div>
+
+      {/* Floating Text Input */}
+      <AnimatePresence>
+        {isEditingText && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-2 left-0 right-0 px-4 z-50"
+          >
+            <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg p-3 flex items-center gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={textInputValue}
+                onChange={(e) => handleTextInputChange(e.target.value)}
+                className="flex-1 bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter text..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleTextSubmit();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleTextSubmit}
+                size="icon"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                title="Submit and deselect"
+              >
+                <Check className="w-4 h-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <CoinModal
         isOpen={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
