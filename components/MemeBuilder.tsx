@@ -68,7 +68,6 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
   const [contractAddress, setContractAddress] = useState("");
   const [showTextTools, setShowTextTools] = useState(false);
   const { address } = useAccount();
-  console.log("🚀 ~ MemeBuilder ~ address:", address)
 
   const CLANKER_FACTORY_V3_1 = '0x2A787b2362021cC3eEa3C24C4748a6cD5B687382';
 
@@ -104,14 +103,18 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     if (!canvas) return;
     const handleSelection = () => {
       setActiveObject(canvas.getActiveObject());
-    };
-    const handleSelectionCleared = () => {
-      setActiveObject(null);
-      // Check if there are any text objects on canvas
-      const hasTextObjects = canvas.getObjects().some(obj => obj.type === 'text' || obj.type === 'i-text');
-      if (!hasTextObjects) {
+
+      const activeObject = canvas.getActiveObject();
+      if (activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text')) {
+        setShowTextTools(true);
+      } else {
         setShowTextTools(false);
       }
+    };
+
+    const handleSelectionCleared = () => {
+      setActiveObject(null);
+      setShowTextTools(false);
     };
     canvas.on('selection:created', handleSelection);
     canvas.on('selection:updated', handleSelection);
@@ -160,7 +163,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
   };
 
-  const handleLaunchToken = async (data: { name: string; symbol: string; description: string }) => {
+  const handleLaunchToken = async (data: { name: string; symbol: string; description: string; }) => {
     setLaunchModalOpen(false);
     if (!canvas) {
       toast({ title: 'No canvas', description: 'Canvas not ready', variant: 'destructive' });
@@ -181,7 +184,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
 
   const executeLaunchToken = async (
     selectedWalletClient: any,
-    data: { name: string; symbol: string; description: string }
+    data: { name: string; symbol: string; description: string; }
   ) => {
     console.log("🚀 ~ executeLaunchToken ~ selectedWalletClient:", selectedWalletClient);
     if (!selectedWalletClient || !publicClient) {
@@ -256,7 +259,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
     }
   };
 
-  const handlePostToZora = async (data: { name: string; symbol: string; description: string }) => {
+  const handlePostToZora = async (data: { name: string; symbol: string; description: string; }) => {
     setCoinModalOpen(false);
     (window as any).tempCoinData = data;
     try {
@@ -615,6 +618,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
                   width: showTextTools ? "auto" : "100%"
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="flex-1"
               >
                 <Button
                   onClick={handleAddText}
