@@ -9,7 +9,7 @@ export async function GET() {
     },
     frame: {
       version: process.env.NEXT_PUBLIC_VERSION,
-      name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
+      name: "Mini-Memes",
       homeUrl: URL,
       iconUrl: process.env.NEXT_PUBLIC_ICON_URL,
       imageUrl: process.env.NEXT_PUBLIC_IMAGE_URL,
@@ -17,6 +17,10 @@ export async function GET() {
       splashImageUrl: process.env.NEXT_PUBLIC_SPLASH_IMAGE_URL,
       splashBackgroundColor: `#${process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR}`,
       webhookUrl: `${URL}/api/webhook`,
+      primaryCategory: "social",
+      subtitle: "make baner memes",
+      description: "make instant banger memes with mini memes",
+      tags: ["meme", "mini", "fun", "banger"],
     },
   });
 }
