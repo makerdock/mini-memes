@@ -648,7 +648,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
             transition={{ duration: 0.2 }}
             className="sticky bottom-20 left-0 right-0 z-50"
           >
-            <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg p-3 flex items-center gap-2">
+            <div className="bg-black/60 rounded-lg shadow-lg p-3 pointer-events-auto border border-white/20 backdrop-blur-md flex items-center gap-2">
               <input
                 ref={inputRef}
                 type="text"
