@@ -18,7 +18,7 @@ export async function GET() {
       splashBackgroundColor: `#${process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR}`,
       webhookUrl: `${URL}/api/webhook`,
       primaryCategory: "social",
-      subtitle: "make baner memes",
+      subtitle: "make banger memes",
       description: "make instant banger memes with mini memes",
       tags: ["meme", "mini", "fun", "banger"],
     },
