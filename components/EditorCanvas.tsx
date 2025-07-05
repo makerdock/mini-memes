@@ -38,7 +38,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ className, template }) => {
     });
     // create a new Fabric.js image instance from the blob
     // 
-    // @ts-ignore 
+    // @ts-ignore - FabricImage constructor type mismatch with fabric library types
     const img = new FabricImage(fabricImage, {
       selectable: false,
       evented: false,

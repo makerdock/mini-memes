@@ -111,7 +111,7 @@ export function MemeBuilder({ template, templateId }: { template?: MemeTemplate;
       if (newActiveObject && newActiveObject.type === 'text') {
         setShowTextTools(true);
         setIsEditingText(true);
-        setTextInputValue(newActiveObject.text || '');
+        setTextInputValue((newActiveObject as Text).text || '');
         // Focus the input after a small delay to ensure it's rendered
         setTimeout(() => inputRef.current?.focus(), 100);
       } else {
